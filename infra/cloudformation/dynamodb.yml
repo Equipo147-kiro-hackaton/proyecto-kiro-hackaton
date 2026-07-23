@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cloud Quest: DevOps Dungeon — DynamoDB Table with ScoreIndex GSI'
+
+Parameters:
+  TableName:
+    Type: String
+    Default: cloud-quest-scores
+    Description: Name of the DynamoDB table
+
+Resources:
+  CloudQuestScoresTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: runId
+          AttributeType: S
+        - AttributeName: gameId
+          AttributeType: S
+        - AttributeName: score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+        - AttributeName: runId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: ScoreIndex
+          KeySchema:
+            - AttributeName: gameId
+              KeyType: HASH
+            - AttributeName: score
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+      Tags:
+        - Key: Project
+          Value: cloud-quest-devops-dungeon
+        - Key: Environment
+          Value: hackathon
+
+Outputs:
+  TableName:
+    Value: !Ref CloudQuestScoresTable
+    Export:
+      Name: CloudQuestDynamoDBTableName
+  TableArn:
+    Value: !GetAtt CloudQuestScoresTable.Arn
+    Export:
+      Name: CloudQuestDynamoDBTableArn

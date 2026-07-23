@@ -12,6 +12,7 @@
 | API | AWS API Gateway (REST) | — |
 | Funciones | AWS Lambda (Node.js 20.x, TypeScript) | — |
 | Base de datos | AWS DynamoDB | on-demand |
+| IaC | AWS CloudFormation | — |
 | Control de versiones | Git + GitHub | — |
 
 ---
@@ -57,19 +58,28 @@ proyecto-kiro-hackaton/
 │   │   ├── ItemSystem.ts
 │   │   └── ScoreSystem.ts
 │   ├── lib/
-│   │   ├── EventBus.ts          # Phaser.Events.EventEmitter singleton
-│   │   ├── ApiClient.ts         # fetch wrapper con AbortController (5s timeout)
-│   │   └── validateUsername.ts  # regex /^[a-zA-Z0-9_]{3,20}$/
+│   │   ├── EventBus.ts
+│   │   ├── ApiClient.ts
+│   │   └── validateUsername.ts
 │   ├── data/
-│   │   ├── puzzles.ts           # PUZZLE_POOL estático (≥5 puzzles × 4 categorías)
-│   │   └── items.ts             # ITEM_DEFINITIONS (6 tipos)
+│   │   ├── puzzles.ts
+│   │   └── items.ts
 │   └── types/
-│       └── index.ts             # Todos los interfaces y tipos compartidos
+│       └── index.ts
 ├── lambda/
 │   ├── submitScore.ts           # POST /scores
 │   ├── getLeaderboard.ts        # GET /scores
 │   └── getOrCreatePlayer.ts     # POST /players
+├── infra/                       # Infraestructura AWS como código
+│   ├── README.md                # Instrucciones de setup y deploy
+│   ├── cloudformation/
+│   │   ├── dynamodb.yml         # Tabla DynamoDB + GSI ScoreIndex
+│   │   └── lambda-role.yml      # IAM Role con permisos mínimos
+│   └── scripts/
+│       ├── deploy.ps1           # Deploy completo (PowerShell)
+│       └── destroy.ps1          # Teardown con confirmación
 ├── amplify.yml                  # Build spec de Amplify
+├── .env.example
 ├── vite.config.ts
 ├── vitest.config.ts
 ├── tsconfig.json
@@ -115,6 +125,10 @@ export const EVENTS = {
 | Variable | Uso |
 |---|---|
 | `VITE_API_BASE_URL` | Base URL del API Gateway en Amplify |
+| `AWS_REGION` | Región AWS (default: `us-east-1`) |
+| `AWS_ACCESS_KEY_ID` | Access key para MCP servers de AWS |
+| `AWS_SECRET_ACCESS_KEY` | Secret key para MCP servers de AWS |
+| `GITHUB_TOKEN` | Personal Access Token para MCP de GitHub |
 
 ---
 
@@ -135,6 +149,22 @@ export const EVENTS = {
 - Partition key: `gameId = "CLOUD_QUEST"` (valor constante para evitar hot partition)
 - Sort key: `score` (Number, orden descendente)
 - Projection: ALL
+
+**IaC:** Definida en `infra/cloudformation/dynamodb.yml`
+
+---
+
+## IAM — Principio de Mínimos Privilegios
+
+El IAM Role `cloud-quest-lambda-role` solo concede:
+- `dynamodb:PutItem` — guardar scores
+- `dynamodb:GetItem` — consultar perfil
+- `dynamodb:UpdateItem` — actualizar personal best
+- `dynamodb:Query` — consultar leaderboard (GSI)
+- `dynamodb:Scan` — fallback queries
+- `logs:CreateLogGroup/Stream`, `logs:PutLogEvents` — CloudWatch Logs
+
+**IaC:** Definida en `infra/cloudformation/lambda-role.yml`
 
 ---
 
@@ -178,7 +208,7 @@ export default defineConfig({
 ### Reglas
 - **Property-based tests** con `fast-check` — mínimo 100 iteraciones por propiedad
 - Etiquetar cada test PBT con comentario: `// Feature: cloud-quest-devops-dungeon, Property N: ...`
-- Los sistemas puros (PuzzleEngine, ScoreSystem, LevelGenerator, ItemSystem, validators) deben tener **≥90% de cobertura**
+- Los sistemas puros deben tener **≥90% de cobertura**
 - AWS SDK mockeado con `vi.mock` en todos los tests de Lambda
 - `fetch` mockeado con `vi.fn()` en tests de ApiClient
 
@@ -186,7 +216,6 @@ export default defineConfig({
 ```bash
 npx vitest --run
 ```
-(usar `--run` para ejecución única, no modo watch)
 
 ---
 
@@ -200,6 +229,7 @@ main
       ├── feature/game-systems
       ├── feature/lambda-backend
       ├── feature/puzzle-content
+      ├── feature/infra-aws
       └── feature/deployment
 ```
 
@@ -210,7 +240,8 @@ fix: corregir clamp de daño cuando timer = 0
 docs: actualizar README con URL de demo
 test: agregar property tests para ScoreSystem
 refactor: extraer validación de username a lib/
-chore: configurar Amplify build spec
+chore(infra): agregar CloudFormation para DynamoDB
+chore(infra): agregar IAM Role con permisos mínimos
 ```
 
 ### Definición de Terminado (DoD)
