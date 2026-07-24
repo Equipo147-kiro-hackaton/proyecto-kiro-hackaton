@@ -1,0 +1,997 @@
+{
+  "pbtResults": {
+    "4.2 Write property test for username validation": {
+      "status": "passed",
+      "lastRunTimestamp": 1784878816014
+    },
+    "3.2 Write property test for puzzle pool integrity": {
+      "status": "passed",
+      "lastRunTimestamp": 1784878816968
+    },
+    "5.2 Write property test for damage formula clamp": {
+      "status": "passed",
+      "lastRunTimestamp": 1784879235735
+    },
+    "6.2 Write property test for level sequence validity invariants": {
+      "status": "passed",
+      "lastRunTimestamp": 1784879236990
+    },
+    "6.3 Write property test for difficulty scaling formula": {
+      "status": "passed",
+      "lastRunTimestamp": 1784879237975
+    },
+    "6.4 Write property test for navigable path guarantee": {
+      "status": "passed",
+      "lastRunTimestamp": 1784879239024
+    },
+    "6.5 Write property test for run-to-run level diversity": {
+      "status": "passed",
+      "lastRunTimestamp": 1784879240161
+    }
+  },
+  "executionHistory": {
+    "1.1 Bootstrap Vite + Phaser.js 3 TypeScript project": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077281
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878088194
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878319812
+      }
+    ],
+    "1.2 Configure Phaser game entry point and canvas scaling": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077395
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878328648
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878445255
+      }
+    ],
+    "2.1 Define all shared TypeScript interfaces and types": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077549
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878463558
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878556054
+      }
+    ],
+    "3.1 Create puzzle pool JSON/TypeScript with 4 categories × ≥5 puzzles each": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077656
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878562124
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878695036
+      }
+    ],
+    "3.3 Create item definitions": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077731
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878721067
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878835709
+      }
+    ],
+    "4.1 Implement `validateUsername` function": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077801
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878563132
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878696110
+      }
+    ],
+    "5.1 Implement `PuzzleEngine` class": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077862
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878841458
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878943268
+      }
+    ],
+    "6.1 Implement `LevelGenerator` class": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077925
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878948505
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879086471
+      }
+    ],
+    "7.1 Implement `ItemSystem` class": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878077998
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879269527
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879442426
+      }
+    ],
+    "8.1 Implement `ScoreSystem` class": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078072
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879448451
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879622699
+      }
+    ],
+    "9.1 Implement `ApiClient` module": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078157
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879654414
+      }
+    ],
+    "10. Checkpoint — Core systems complete": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078252
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879660018
+      }
+    ],
+    "11.1 Implement `LoginScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078313
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879666046
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879823066
+      }
+    ],
+    "11.3 Implement `MainMenuScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078380
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879837903
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879912097
+      }
+    ],
+    "12.1 Implement `TutorialScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078438
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879917385
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880010800
+      }
+    ],
+    "13.1 Implement `GameScene` — room navigation and run state": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078514
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880016351
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880159966
+      }
+    ],
+    "13.3 Implement `GameScene` — puzzle presentation and timer": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078590
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880166681
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880351799
+      }
+    ],
+    "13.5 Implement `GameScene` — answer submission and combat resolution": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078680
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880359001
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880542236
+      }
+    ],
+    "13.6 Implement `GameScene` — item selection and discard prompt": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078787
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880548260
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880781718
+      }
+    ],
+    "13.7 Implement `GameScene` — hero death and level progression": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078875
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880549116
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880782610
+      }
+    ],
+    "13.9 Implement pause menu via Escape key": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878078956
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880789597
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880949644
+      }
+    ],
+    "14.1 Implement `GameOverScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079022
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880790432
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880948816
+      }
+    ],
+    "14.3 Implement `VictoryScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079104
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880955911
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881102673
+      }
+    ],
+    "14.5 Implement `LeaderboardScene`": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079195
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880961281
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881103451
+      }
+    ],
+    "15.1 Implement keyboard navigation and focus indicators": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079265
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881120702
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881128448
+      }
+    ],
+    "15.2 Implement font sizing and contrast compliance": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079329
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881121923
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881129328
+      }
+    ],
+    "16. Run end summary screen": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079398
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881130263
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881136119
+      }
+    ],
+    "17. Checkpoint — Full client complete": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079465
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881141054
+      }
+    ],
+    "18.1 Create DynamoDB table infrastructure definition": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079535
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881147744
+      }
+    ],
+    "18.2 Implement Lambda function — score submission (`POST /scores`)": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079625
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881152783
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881397625
+      }
+    ],
+    "18.3 Implement Lambda function — leaderboard retrieval (`GET /scores`)": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079715
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881153744
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881398611
+      }
+    ],
+    "18.4 Implement Lambda function — player profile (`POST /players`)": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079782
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881154731
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881399573
+      }
+    ],
+    "19.1 Configure Amplify hosting and API Gateway": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079850
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881405622
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881530542
+      }
+    ],
+    "20.1 Write integration tests for full run simulation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079918
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881552746
+      }
+    ],
+    "21. Final checkpoint — All tests pass and game is complete": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878079992
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881557357
+      }
+    ],
+    "1. Project scaffolding and configuration": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878445324
+      }
+    ],
+    "1.3 Verify project builds and tests run": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878459539
+      }
+    ],
+    "2. TypeScript types and shared data models": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878556157
+      }
+    ],
+    "4. Username validation utility": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878696232
+      }
+    ],
+    "2.2 Write unit tests for type shape validation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878713538
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878832173
+      }
+    ],
+    "3.2 Write property test for puzzle pool integrity": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878714471
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878834728
+      }
+    ],
+    "4.2 Write property test for username validation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878715397
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878832852
+      }
+    ],
+    "4.3 Write unit tests for username validation edge cases": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878716326
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878833911
+      }
+    ],
+    "3. Static data — puzzle pool and item definitions": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878835781
+      }
+    ],
+    "5. PuzzleEngine implementation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784878943365
+      }
+    ],
+    "6. LevelGenerator implementation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879086764
+      }
+    ],
+    "6.2 Write property test for level sequence validity invariants": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879100768
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879261011
+      }
+    ],
+    "6.3 Write property test for difficulty scaling formula": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879101945
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879261785
+      }
+    ],
+    "6.4 Write property test for navigable path guarantee": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879102929
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879262724
+      }
+    ],
+    "6.5 Write property test for run-to-run level diversity": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879103952
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879263658
+      }
+    ],
+    "6.6 Write unit tests for LevelGenerator": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879104932
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879264542
+      }
+    ],
+    "5.2 Write property test for damage formula clamp": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879106556
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879259182
+      }
+    ],
+    "5.3 Write unit tests for PuzzleEngine": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879107401
+      },
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879260054
+      }
+    ],
+    "7. ItemSystem implementation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879442743
+      }
+    ],
+    "8. ScoreSystem implementation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879622801
+      }
+    ],
+    "7.2 Write property test for item selection without replacement": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879633035
+      }
+    ],
+    "7.3 Write property test for item effect application and pool removal": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879634237
+      }
+    ],
+    "7.4 Write property test for active item cap": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879635226
+      }
+    ],
+    "7.5 Write unit tests for ItemSystem edge cases": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879636363
+      }
+    ],
+    "8.2 Write property test for score increment formula": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879637494
+      }
+    ],
+    "8.3 Write property test for score bonus on bug defeat": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879638566
+      }
+    ],
+    "8.4 Write property test for personal best update rule": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879639612
+      }
+    ],
+    "8.5 Write unit tests for ScoreSystem": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879640553
+      }
+    ],
+    "9. ApiClient implementation": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879654546
+      }
+    ],
+    "11.2 Write property test for personal best display": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879832336
+      }
+    ],
+    "9.2 Write unit tests for ApiClient": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879833348
+      }
+    ],
+    "11. Phaser scenes — LoginScene and MainMenuScene": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784879912217
+      }
+    ],
+    "12. Phaser scenes — TutorialScene": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880010943
+      }
+    ],
+    "13.2 Write property test for rest room HP restoration clamp": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880165730
+      }
+    ],
+    "13.4 Write property test for timer color threshold": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880358057
+      }
+    ],
+    "13.8 Write property test for low-health indicator threshold": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880788597
+      }
+    ],
+    "13. Phaser scenes — GameScene (core combat loop)": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880949739
+      }
+    ],
+    "14.2 Write property test for end-screen content completeness": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784880956927
+      }
+    ],
+    "14. Phaser scenes — GameOverScene, VictoryScene, and LeaderboardScene": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881103597
+      }
+    ],
+    "14.4 Write property test for new run state reset": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881115303
+      }
+    ],
+    "14.6 Write property test for leaderboard entry rendering": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881116392
+      }
+    ],
+    "15. Accessibility and UI polish": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881129468
+      }
+    ],
+    "18. AWS backend — DynamoDB table and Lambda functions": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881399684
+      }
+    ],
+    "19. AWS Amplify hosting and CI/CD configuration": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881530703
+      }
+    ],
+    "18.5 Write unit tests for Lambda functions": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881545563
+      }
+    ],
+    "19.2 Verify Amplify build and deployment": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881546418
+      }
+    ],
+    "20.2 Write integration tests for DynamoDB write failure and retry": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881547429
+      }
+    ],
+    "20.3 Write integration tests for leaderboard edge cases": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881548337
+      }
+    ],
+    "20. Integration tests — full run simulation and API flows": [
+      {
+        "executionId": "5a8adf74-3523-4d51-8c5c-e28beb553b66",
+        "chatSessionId": "sess_f5d65f1c-8164-4fc1-98e4-007da3d8c5e4",
+        "timestamp": 1784881552986
+      }
+    ]
+  }
+}

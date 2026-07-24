@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Quest: DevOps Dungeon</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #game-container {
+      width: 960px;
+      height: 540px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <script>
+  // Mock API para desarrollo local
+  const originalFetch = window.fetch;
+  window.fetch = async (url, options) => {
+    if (typeof url === 'string' && url.includes('/players')) {
+      const body = JSON.parse(options?.body || '{}');
+      return new Response(JSON.stringify({
+        username: body.username,
+        personalBest: 0,
+        updatedAt: new Date().toISOString()
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (typeof url === 'string' && url.includes('/scores') && options?.method === 'GET') {
+      return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (typeof url === 'string' && url.includes('/scores') && options?.method === 'POST') {
+      return new Response(JSON.stringify({ message: 'ok' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    return originalFetch(url, options);
+  };
+</script>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

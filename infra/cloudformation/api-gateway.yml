@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cloud Quest: DevOps Dungeon — API Gateway REST API'
+
+Parameters:
+  SubmitScoreLambdaArn:
+    Type: String
+    Description: ARN of the submitScore Lambda function
+  GetLeaderboardLambdaArn:
+    Type: String
+    Description: ARN of the getLeaderboard Lambda function
+  GetOrCreatePlayerLambdaArn:
+    Type: String
+    Description: ARN of the getOrCreatePlayer Lambda function
+
+Resources:
+  CloudQuestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: cloud-quest-api
+      Description: REST API for Cloud Quest DevOps Dungeon
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # /scores resource
+  ScoresResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ParentId: !GetAtt CloudQuestApi.RootResourceId
+      PathPart: scores
+
+  # POST /scores — submitScore
+  ScoresPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitScoreLambdaArn}/invocations'
+
+  # GET /scores — getLeaderboard
+  ScoresGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLeaderboardLambdaArn}/invocations'
+
+  # /players resource
+  PlayersResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ParentId: !GetAtt CloudQuestApi.RootResourceId
+      PathPart: players
+
+  # POST /players — getOrCreatePlayer
+  PlayersPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ResourceId: !Ref PlayersResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetOrCreatePlayerLambdaArn}/invocations'
+
+  # CORS — OPTIONS /scores
+  ScoresOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ResourceId: !Ref ScoresResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: '200'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # CORS — OPTIONS /players
+  PlayersOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      ResourceId: !Ref PlayersResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - StatusCode: '200'
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: '200'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ScoresPost
+      - ScoresGet
+      - PlayersPost
+      - ScoresOptions
+      - PlayersOptions
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+
+  # Stage
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref CloudQuestApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: prod
+
+Outputs:
+  ApiUrl:
+    Description: Base URL for the Cloud Quest API (set as VITE_API_BASE_URL in Amplify)
+    Value: !Sub 'https://${CloudQuestApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Export:
+      Name: CloudQuestApiUrl
