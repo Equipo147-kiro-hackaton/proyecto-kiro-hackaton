@@ -131,3 +131,24 @@ export interface VictoryData {
   bugsDefeated: number;
   puzzlesSolved: number;
 }
+
+// ─── Interactable Types ──────────────────────────────────────────────────────
+
+export type InteractableType = 'terminal' | 'server' | 'whiteboard' | 'door' | 'checkpoint';
+
+export interface Interactable {
+  id: string;
+  type: InteractableType;
+  tileX: number;
+  tileY: number;
+  fragmentId?: string;
+  puzzleId?: string;
+  locked?: boolean;
+  activated?: boolean;
+}
+
+export interface InteractionEvent {
+  interactable: Interactable;
+  heroTileX: number;
+  heroTileY: number;
+}
