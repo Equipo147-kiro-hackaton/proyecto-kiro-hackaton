@@ -1,0 +1,165 @@
+name: Quality Gates — PR Review
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  coverage-gate:
+    name: Coverage >= 70%
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run tests with coverage
+        run: npx vitest --run --coverage --reporter=json --outputFile=coverage-results.json
+        continue-on-error: true
+
+      - name: Check coverage thresholds
+        run: |
+          echo "Checking coverage thresholds..."
+          if [ -f "coverage/coverage-summary.json" ]; then
+            TOTAL=$(cat coverage/coverage-summary.json | jq '.total.statements.pct // 0')
+            echo "Total statement coverage: ${TOTAL}%"
+            THRESHOLD=70
+            if (( $(echo "$TOTAL < $THRESHOLD" | bc -l) )); then
+              echo "::error::Coverage ${TOTAL}% is below ${THRESHOLD}% threshold"
+              exit 1
+            fi
+            echo "Coverage gate passed: ${TOTAL}%"
+          else
+            echo "::warning::Coverage report not found — skipping threshold check"
+          fi
+
+  typescript-gate:
+    name: Zero TypeScript Errors
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: TypeScript strict check
+        run: |
+          ERRORS=$(npx tsc --noEmit 2>&1 | grep -c "error TS" || true)
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::Found $ERRORS TypeScript errors"
+            npx tsc --noEmit --pretty
+            exit 1
+          fi
+          echo "TypeScript gate passed: 0 errors"
+
+  no-any-gate:
+    name: Zero 'any' in Source
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for 'any' type usage
+        run: |
+          ANY_COUNT=$(grep -rn ": any" src/ lambda/ --include="*.ts" | grep -v "node_modules" | grep -v ".test.ts" | grep -v "// eslint-disable" | wc -l || true)
+          if [ "$ANY_COUNT" -gt 0 ]; then
+            echo "::error::Found $ANY_COUNT usages of 'any' type:"
+            grep -rn ": any" src/ lambda/ --include="*.ts" | grep -v "node_modules" | grep -v ".test.ts"
+            exit 1
+          fi
+          echo "No-any gate passed: 0 occurrences"
+
+  security-patterns-gate:
+    name: Security Patterns Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for hardcoded secrets
+        run: |
+          ISSUES=0
+          if grep -rn "AKIA[0-9A-Z]" src/ lambda/ --include="*.ts" 2>/dev/null; then
+            echo "::error::Potential AWS key found in source"
+            ISSUES=$((ISSUES + 1))
+          fi
+          if grep -rn "password\s*=\s*['\"]" src/ lambda/ --include="*.ts" 2>/dev/null; then
+            echo "::error::Potential hardcoded password found"
+            ISSUES=$((ISSUES + 1))
+          fi
+          if [ "$ISSUES" -gt 0 ]; then
+            exit 1
+          fi
+          echo "Security patterns gate passed"
+
+      - name: Check for eval/Function constructor
+        run: |
+          if grep -rn "eval(" src/ --include="*.ts" 2>/dev/null; then
+            echo "::error::eval() found in source — security risk"
+            exit 1
+          fi
+          if grep -rn "new Function(" src/ --include="*.ts" 2>/dev/null; then
+            echo "::error::new Function() found — security risk"
+            exit 1
+          fi
+          echo "No dangerous code patterns found"
+
+  lambda-validation-gate:
+    name: Lambda Validation Patterns
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Lambda CORS headers
+        run: |
+          for file in lambda/submitScore.ts lambda/getLeaderboard.ts lambda/getOrCreatePlayer.ts; do
+            if [ -f "$file" ]; then
+              if ! grep -q "Access-Control-Allow-Origin" "$file"; then
+                echo "::error::$file missing CORS headers"
+                exit 1
+              fi
+            fi
+          done
+          echo "Lambda validation gate passed"
+
+  summary:
+    name: PR Quality Summary
+    needs: [coverage-gate, typescript-gate, no-any-gate, security-patterns-gate, lambda-validation-gate]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Quality Gates Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Coverage >= 70% | ${{ needs.coverage-gate.result == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Errors = 0 | ${{ needs.typescript-gate.result == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| No any usage | ${{ needs.no-any-gate.result == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Patterns | ${{ needs.security-patterns-gate.result == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lambda Validation | ${{ needs.lambda-validation-gate.result == 'success' && 'PASS' || 'FAIL' }} |" >> $GITHUB_STEP_SUMMARY

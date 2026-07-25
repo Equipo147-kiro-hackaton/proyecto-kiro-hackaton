@@ -11,7 +11,7 @@ import type { GameOverData, RunResult } from '@/types';
  * Requirements: 8.1, 8.3, 8.5, 8.6
  */
 export class GameOverScene extends Phaser.Scene {
-  private data!: GameOverData;
+  private gameOverData!: GameOverData;
   private scoreSystem!: ScoreSystem;
 
   constructor() {
@@ -19,7 +19,7 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   init(data: GameOverData): void {
-    this.data = data;
+    this.gameOverData = data;
   }
 
   create(): void {
@@ -43,7 +43,7 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Final Score
-    this.add.text(480, 170, `Final Score: ${this.data.score}`, {
+    this.add.text(480, 170, `Final Score: ${this.gameOverData.score}`, {
       fontSize: '24px',
       fontFamily: 'monospace',
       color: '#ffffff',
@@ -51,21 +51,21 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Level Reached
-    this.add.text(480, 220, `Level Reached: ${this.data.levelReached}`, {
+    this.add.text(480, 220, `Level Reached: ${this.gameOverData.levelReached}`, {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Bugs Defeated
-    this.add.text(480, 260, `Bugs Defeated: ${this.data.bugsDefeated}`, {
+    this.add.text(480, 260, `Bugs Defeated: ${this.gameOverData.bugsDefeated}`, {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Puzzles Solved
-    this.add.text(480, 300, `Puzzles Solved: ${this.data.puzzlesSolved}`, {
+    this.add.text(480, 300, `Puzzles Solved: ${this.gameOverData.puzzlesSolved}`, {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
@@ -128,10 +128,10 @@ export class GameOverScene extends Phaser.Scene {
   private submitScoreToBackend(): void {
     const result: RunResult = {
       username: this.game.registry.get('playerProfile')?.username ?? 'anonymous',
-      score: this.data.score,
-      highestLevel: this.data.levelReached,
-      totalPuzzlesSolved: this.data.puzzlesSolved,
-      totalBugsDefeated: this.data.bugsDefeated,
+      score: this.gameOverData.score,
+      highestLevel: this.gameOverData.levelReached,
+      totalPuzzlesSolved: this.gameOverData.puzzlesSolved,
+      totalBugsDefeated: this.gameOverData.bugsDefeated,
     };
 
     // Fire and forget — ScoreSystem handles retry logic internally

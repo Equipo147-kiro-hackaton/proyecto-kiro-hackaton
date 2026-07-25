@@ -983,7 +983,7 @@ export class GameScene extends Phaser.Scene {
   private showItemSelection(room: Room): void {
     const selection = this.itemSystem.drawSelection();
 
-    if (!selection || selection.length === 0) {
+    if (!selection) {
       // No items left in pool — skip to exits
       this.showExitOptions(room);
       return;

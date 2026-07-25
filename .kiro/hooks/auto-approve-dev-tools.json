@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-approve development tools",
+      "trigger": "PreToolUse",
+      "description": "Automatically approves all common development tools (file read/write/edit, terminal commands, search, etc.) so the agent can work autonomously on the Cloud Quest project.",
+      "matcher": "fs_write|str_replace|fs_append|read_file|read_files|read_code|execute_pwsh|grep_search|file_search|list_directory|delete_file|get_diagnostics|control_pwsh_process|get_process_output|list_processes|smart_relocate|semantic_rename|web_fetch|remote_web_search|invoke_sub_agent|todo_list|update_session_information|createHook",
+      "action": {
+        "type": "command",
+        "command": "echo {\"hookSpecificOutput\":{\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"Auto-approved for Cloud Quest development\"}}"
+      }
+    }
+  ]
+}

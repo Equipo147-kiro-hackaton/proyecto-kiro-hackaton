@@ -152,3 +152,33 @@ export interface InteractionEvent {
   heroTileX: number;
   heroTileY: number;
 }
+
+// ─── Fragment Types ──────────────────────────────────────────────────────────
+
+export interface Fragment {
+  id: string;
+  levelId: string;
+  order: number;             // Position in the correct pipeline sequence
+  content: string;           // Display label (e.g., "npm test", "docker build")
+  description: string;       // Hint about what this fragment does
+  difficulty: number;        // 1–3, affects boss damage weight
+  weight: number;            // Percentage of boss HP this fragment removes (0–100)
+  isCritical: boolean;       // If true, deals ×1.5 damage to boss
+}
+
+export interface FragmentState {
+  fragmentId: string;
+  collected: boolean;
+  solvedCorrectly: boolean;
+}
+
+export interface FragmentProgress {
+  levelId: string;
+  collected: FragmentState[];
+  totalRequired: number;
+  isComplete: boolean;
+}
+
+// ─── Difficulty Types ────────────────────────────────────────────────────────
+
+export type DifficultyMode = 'beginner' | 'normal' | 'hard';

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Quality gate on writes",
+      "trigger": "PreToolUse",
+      "description": "Reminds the agent to validate every write against project conventions before proceeding.",
+      "matcher": "fs_write|str_replace",
+      "action": {
+        "type": "agent",
+        "prompt": "Before completing this write operation, verify: 1) The code follows TypeScript strict mode (no 'any', proper types). 2) It respects the project structure in .kiro/steering/structure.md. 3) It does NOT modify business formulas without explicit user approval. 4) It uses existing patterns (EventBus, game.registry, ApiClient conventions). 5) If creating a new file, confirm it belongs in the correct directory per project structure."
+      }
+    }
+  ]
+}

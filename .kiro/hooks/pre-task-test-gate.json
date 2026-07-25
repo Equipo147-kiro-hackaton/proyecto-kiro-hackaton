@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Pre-task test verification",
+      "trigger": "PreTaskExec",
+      "description": "Runs tests before any task execution starts to ensure the codebase is in a green state before making changes.",
+      "action": {
+        "type": "command",
+        "command": "npx vitest --run 2>&1 | tail -5",
+        "timeout": 60
+      }
+    }
+  ]
+}

@@ -10,8 +10,10 @@ import {
   getFragmentProgress,
   type TiledObjectData,
 } from '@/systems/InteractableSystem';
+import { PuzzleOverlay } from '@/ui/PuzzleOverlay';
+import { PuzzleEngine } from '@/systems/PuzzleEngine';
 import { EventBus } from '@/lib/EventBus';
-import type { Interactable } from '@/types';
+import type { Interactable, DifficultyMode } from '@/types';
 
 /**
  * TileTestScene — Test scene for validating tilemap pipeline,
@@ -30,6 +32,11 @@ export class TileTestScene extends Phaser.Scene {
   private interactionIndicator!: InteractionIndicator;
   private currentInteractable: Interactable | null = null;
   private progressText!: Phaser.GameObjects.Text;
+
+  // Puzzle overlay
+  private puzzleOverlay: PuzzleOverlay | null = null;
+  private puzzleEngine!: PuzzleEngine;
+  private currentDifficulty: DifficultyMode = 'normal';
 
   // Input keys
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -101,6 +108,9 @@ export class TileTestScene extends Phaser.Scene {
 
     // Initialize interactable system
     this.initInteractables();
+
+    // Initialize puzzle engine
+    this.puzzleEngine = new PuzzleEngine();
 
     // Create interaction indicator
     this.interactionIndicator = new InteractionIndicator(this);
@@ -211,7 +221,7 @@ export class TileTestScene extends Phaser.Scene {
       this.hero.move(Direction.Right);
     } else {
       // No input — show idle
-      this.hero.stop();
+      this.hero.stopMovement();
     }
   }
 
@@ -286,9 +296,75 @@ export class TileTestScene extends Phaser.Scene {
   private handleInteraction(): void {
     if (!this.currentInteractable) return;
     if (this.currentInteractable.activated) return;
+    if (this.puzzleOverlay) return; // Already showing a puzzle
 
     const interactable = this.currentInteractable;
 
+    // If interactable has a puzzle, show the puzzle overlay
+    if (interactable.puzzleId) {
+      this.openPuzzleOverlay(interactable);
+    } else {
+      // No puzzle — just activate directly (e.g., door)
+      this.activateInteractableDirectly(interactable);
+    }
+  }
+
+  /**
+   * Open the puzzle overlay for an interactable with a puzzle.
+   */
+  private openPuzzleOverlay(interactable: Interactable): void {
+    // Get a puzzle from the engine (use the category from the puzzle data)
+    const puzzle = this.puzzleEngine.draw(
+      interactable.puzzleId?.startsWith('syn') ? 'syntax' :
+      interactable.puzzleId?.startsWith('log') ? 'logic' :
+      interactable.puzzleId?.startsWith('dev') ? 'devops' : 'memory'
+    );
+
+    if (!puzzle) {
+      // No puzzles available — activate directly
+      this.activateInteractableDirectly(interactable);
+      return;
+    }
+
+    // Lock hero movement
+    this.hero.setMovementLocked(true);
+
+    // Hide interaction indicator
+    this.interactionIndicator.hide();
+
+    // Create the overlay
+    this.puzzleOverlay = new PuzzleOverlay(this, {
+      puzzle,
+      difficulty: this.currentDifficulty,
+      fragmentId: interactable.fragmentId,
+      onSolved: (remainingSeconds: number) => {
+        // Mark interactable as activated
+        activateInteractable(interactable.id, this.interactables);
+
+        // Show success feedback
+        this.showInteractionFeedback(interactable);
+
+        // Update progress
+        const progress = getFragmentProgress(this.interactables);
+        this.progressText.setText(`Fragments: ${progress.activated}/${progress.total}`);
+
+        console.log(`Puzzle solved! Fragment: ${interactable.fragmentId}, Time left: ${remainingSeconds}s`);
+      },
+      onFailed: () => {
+        console.log(`Puzzle failed for: ${interactable.id}`);
+      },
+      onClosed: () => {
+        // Unlock hero movement
+        this.hero.setMovementLocked(false);
+        this.puzzleOverlay = null;
+      },
+    });
+  }
+
+  /**
+   * Activate an interactable directly (no puzzle required).
+   */
+  private activateInteractableDirectly(interactable: Interactable): void {
     // Mark as activated
     activateInteractable(interactable.id, this.interactables);
 
@@ -304,17 +380,14 @@ export class TileTestScene extends Phaser.Scene {
       heroTileY: tileY,
     });
 
-    // Show feedback message
+    // Show feedback
     this.showInteractionFeedback(interactable);
 
     // Update progress display
     const progress = getFragmentProgress(this.interactables);
     this.progressText.setText(`Fragments: ${progress.activated}/${progress.total}`);
 
-    console.log(`Interacted with: ${interactable.type} (${interactable.id})`);
-    if (interactable.fragmentId) {
-      console.log(`  Fragment collected: ${interactable.fragmentId}`);
-    }
+    console.log(`Activated directly: ${interactable.type} (${interactable.id})`);
   }
 
   /**

@@ -213,7 +213,7 @@ export class Hero extends Phaser.GameObjects.Sprite {
   /**
    * Stop the hero (play idle animation for current facing).
    */
-  stop(): void {
+  stopMovement(): void {
     if (!this.isMoving) {
       this.playIdleAnimation();
     }

@@ -34,7 +34,7 @@ describe('ItemSystem', () => {
     it('returns 2 distinct items from the pool', () => {
       const selection = system.drawSelection();
       expect(selection.length).toBe(2);
-      expect(selection[0].id).not.toBe(selection[1].id);
+      expect(selection[0].id).not.toBe(selection[1]!.id);
     });
 
     it('returns items from the ITEM_DEFINITIONS pool', () => {
