@@ -22,27 +22,6 @@
 </head>
 <body>
   <div id="game-container"></div>
-  <script>
-  // Mock API para desarrollo local
-  const originalFetch = window.fetch;
-  window.fetch = async (url, options) => {
-    if (typeof url === 'string' && url.includes('/players')) {
-      const body = JSON.parse(options?.body || '{}');
-      return new Response(JSON.stringify({
-        username: body.username,
-        personalBest: 0,
-        updatedAt: new Date().toISOString()
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-    if (typeof url === 'string' && url.includes('/scores') && options?.method === 'GET') {
-      return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-    if (typeof url === 'string' && url.includes('/scores') && options?.method === 'POST') {
-      return new Response(JSON.stringify({ message: 'ok' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-    return originalFetch(url, options);
-  };
-</script>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
