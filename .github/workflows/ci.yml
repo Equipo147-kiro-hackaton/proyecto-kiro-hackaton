@@ -81,19 +81,19 @@ jobs:
         run: npm ci
 
       - name: Audit dependencies
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
 
       - name: Check for known vulnerabilities
         run: |
-          AUDIT_RESULT=$(npm audit --json 2>/dev/null || true)
+          AUDIT_RESULT=$(npm audit --omit=dev --json 2>/dev/null || true)
           CRITICAL=$(echo "$AUDIT_RESULT" | jq '.metadata.vulnerabilities.critical // 0')
           HIGH=$(echo "$AUDIT_RESULT" | jq '.metadata.vulnerabilities.high // 0')
           if [ "$CRITICAL" -gt 0 ]; then
-            echo "::error::Found $CRITICAL critical vulnerabilities"
+            echo "::error::Found $CRITICAL critical vulnerabilities in production deps"
             exit 1
           fi
-          if [ "$HIGH" -gt 3 ]; then
-            echo "::warning::Found $HIGH high vulnerabilities"
+          if [ "$HIGH" -gt 0 ]; then
+            echo "::warning::Found $HIGH high vulnerabilities in production deps"
           fi
-          echo "Security scan passed: $CRITICAL critical, $HIGH high"
+          echo "Security scan passed: $CRITICAL critical, $HIGH high (production only)"

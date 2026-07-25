@@ -16,6 +16,7 @@
     "@aws-sdk/client-dynamodb": "^3.1094.0",
     "@aws-sdk/util-dynamodb": "^3.996.7",
     "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^1.6.1",
     "fast-check": "^3.19.0",
     "jsdom": "^24.1.0",
     "typescript": "^5.4.0",
