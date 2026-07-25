@@ -6,6 +6,7 @@ import { GameScene } from '@/scenes/GameScene';
 import { GameOverScene } from '@/scenes/GameOverScene';
 import { VictoryScene } from '@/scenes/VictoryScene';
 import { LeaderboardScene } from '@/scenes/LeaderboardScene';
+import { TileTestScene } from '@/scenes/TileTestScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -18,6 +19,13 @@ const config: Phaser.Types.Core.GameConfig = {
   dom: {
     createContainer: true,
   },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { x: 0, y: 0 },
+      debug: false,
+    },
+  },
   scene: [
     LoginScene,
     MainMenuScene,
@@ -26,9 +34,10 @@ const config: Phaser.Types.Core.GameConfig = {
     GameOverScene,
     VictoryScene,
     LeaderboardScene,
+    TileTestScene,
   ],
   parent: 'game-container',
-  backgroundColor: '#000000',
+  backgroundColor: '#0a0a1a',
 };
 
 const game = new Phaser.Game(config);

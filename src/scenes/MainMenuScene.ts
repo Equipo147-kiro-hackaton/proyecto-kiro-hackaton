@@ -69,10 +69,23 @@ export class MainMenuScene extends Phaser.Scene {
       this.scene.start('LeaderboardScene');
     });
 
-    // Keyboard hints
-    this.add.text(480, 420, 'Press 1 or S to Start  |  Press 2 or L for Leaderboard', {
+    // Tile Test button (dev mode)
+    const tileTestBtn = this.add.text(480, 390, '[ TILE TEST (dev) ]', {
       fontFamily: 'monospace',
-      fontSize: '14px',
+      fontSize: '16px',
+      color: '#ff8844',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    tileTestBtn.on('pointerover', () => tileTestBtn.setColor('#ffaa66'));
+    tileTestBtn.on('pointerout', () => tileTestBtn.setColor('#ff8844'));
+    tileTestBtn.on('pointerdown', () => {
+      this.scene.start('TileTestScene');
+    });
+
+    // Keyboard hints
+    this.add.text(480, 440, 'Press 1/S to Start  |  2/L for Leaderboard  |  T for Tile Test', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
       color: '#888888',
     }).setOrigin(0.5);
 
@@ -88,6 +101,9 @@ export class MainMenuScene extends Phaser.Scene {
     });
     this.input.keyboard?.on('keydown-L', () => {
       this.scene.start('LeaderboardScene');
+    });
+    this.input.keyboard?.on('keydown-T', () => {
+      this.scene.start('TileTestScene');
     });
   }
 
