@@ -1,206 +1,76 @@
 /**
- * SynthAudio — Procedural sound effect generator using Web Audio API.
- * Generates retro 8-bit style SFX at runtime without external files.
- * 
- * Each sound is a short burst (50-500ms) of synthesized waveforms.
- * Volume and mute are controlled by the caller (AudioManager).
+ * SynthAudio — Sound effect generator using ZzFX (MIT).
+ * https://github.com/KilledByAPixel/ZzFX
+ *
+ * Each sound is defined as a ZzFX parameter array, producing high-quality
+ * retro-style SFX without any external audio files.
+ *
+ * ZzFX parameters (20 total):
+ * volume, randomness, frequency, attack, sustain, release, shape, shapeCurve,
+ * slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise, modulation,
+ * bitCrush, delay, sustainVolume, decay, tremolo
  */
 
-let audioContext: AudioContext | null = null;
+import { zzfx, ZZFX } from 'zzfx';
+import type { SoundKey } from '@/lib/AudioManager';
 
-function getContext(): AudioContext | null {
-  if (!audioContext) {
-    try {
-      audioContext = new AudioContext();
-    } catch {
-      return null;
-    }
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume().catch(() => { /* ignore */ });
-  }
-  return audioContext;
-}
+/**
+ * ZzFX presets for each game sound effect.
+ * Generated and tuned using https://killedbyapixel.github.io/ZzFX/
+ */
+const SFX_PRESETS: Record<SoundKey, (number | undefined)[]> = {
+  // Soft footstep click
+  'sfx-step': [0.2, 0, 200, , 0.01, 0.01, 4, 0.5, , , , , , , , , , 0.5, 0.01],
 
-/** Default volume (can be overridden by caller) */
+  // UI interaction blip (friendly beep)
+  'sfx-interact': [0.4, 0, 880, 0.01, 0.05, 0.1, 1, 1.5, , , 200, 0.03, , , , , , 0.7, 0.02],
+
+  // Correct answer — ascending triumphant jingle
+  'sfx-correct': [0.5, 0, 587, 0.02, 0.15, 0.3, 1, 0.5, , , 400, 0.05, 0.05, , , , , 0.8, 0.1],
+
+  // Incorrect answer — descending buzz
+  'sfx-incorrect': [0.4, 0, 200, 0.01, 0.1, 0.2, 3, 2, , , -100, 0.05, , , , 0.5, , 0.6, 0.05],
+
+  // Fragment collected — magical tinkle
+  'sfx-fragment': [0.5, 0, 1200, 0.01, 0.08, 0.2, 1, 1, , , 300, 0.02, 0.04, , , , , 0.8, 0.05],
+
+  // Boss hit — heavy impact thud
+  'sfx-boss-hit': [0.6, 0, 150, 0.01, 0.05, 0.15, 4, 3, , , , , , 0.5, , 0.3, , 0.9, 0.02],
+
+  // Boss attack — aggressive slash
+  'sfx-boss-attack': [0.5, 0, 300, 0.01, 0.03, 0.1, 4, 2, -20, , , , , 0.8, , , , 0.7, 0.03],
+
+  // Victory — celebratory fanfare
+  'sfx-victory': [0.6, 0, 523, 0.02, 0.2, 0.4, 1, 0.5, , , 200, 0.08, 0.08, , , , , 0.9, 0.15],
+
+  // Damage taken — painful hit
+  'sfx-damage': [0.5, 0, 100, 0.01, 0.05, 0.1, 4, 3, , , -50, 0.02, , 0.3, , 0.5, , 0.7, 0.02],
+
+  // Door open — metallic creak
+  'sfx-door': [0.3, 0, 400, 0.02, 0.1, 0.2, 2, 1, 10, , 100, 0.05, 0.02, , , , , 0.6, 0.08],
+};
+
+/** Current volume multiplier (set by AudioManager) */
 let currentVolume = 0.7;
 
 /**
- * Set the volume for synth audio (called by AudioManager).
+ * Set the volume for synth audio.
  */
 export function setSynthVolume(vol: number): void {
   currentVolume = Math.max(0, Math.min(1, vol));
+  ZZFX.volume = currentVolume;
 }
 
 /**
- * Play a synthesized sound effect.
- * All sounds are non-blocking and fire-and-forget.
+ * Play a sound effect by key using ZzFX.
  */
-export function playSynth(type: string): void {
-  const ctx = getContext();
-  if (!ctx) return;
+export function playSynth(key: SoundKey): void {
+  const preset = SFX_PRESETS[key];
+  if (!preset) return;
 
-  switch (type) {
-    case 'sfx-correct': playCorrect(ctx); break;
-    case 'sfx-incorrect': playIncorrect(ctx); break;
-    case 'sfx-fragment': playFragment(ctx); break;
-    case 'sfx-boss-hit': playBossHit(ctx); break;
-    case 'sfx-boss-attack': playBossAttack(ctx); break;
-    case 'sfx-victory': playVictory(ctx); break;
-    case 'sfx-damage': playDamage(ctx); break;
-    case 'sfx-door': playDoor(ctx); break;
-    case 'sfx-interact': playInteract(ctx); break;
-    case 'sfx-step': playStep(ctx); break;
-  }
-}
+  // Apply volume to the first parameter (volume) of the preset
+  const params = [...preset];
+  params[0] = (params[0] ?? 0.5) * currentVolume;
 
-// ─── Sound Definitions ────────────────────────────────────────────────────
-
-function playCorrect(ctx: AudioContext): void {
-  // Ascending arpeggio: C5 → E5 → G5
-  const vol = currentVolume * 0.3;
-  const now = ctx.currentTime;
-  playTone(ctx, 523, now, 0.08, vol, 'square');
-  playTone(ctx, 659, now + 0.08, 0.08, vol, 'square');
-  playTone(ctx, 784, now + 0.16, 0.12, vol * 1.2, 'square');
-}
-
-function playIncorrect(ctx: AudioContext): void {
-  // Descending buzz: E4 → C4
-  const vol = currentVolume * 0.25;
-  const now = ctx.currentTime;
-  playTone(ctx, 330, now, 0.1, vol, 'sawtooth');
-  playTone(ctx, 262, now + 0.1, 0.15, vol, 'sawtooth');
-}
-
-function playFragment(ctx: AudioContext): void {
-  // Sparkle: high pitch shimmer
-  const vol = currentVolume * 0.2;
-  const now = ctx.currentTime;
-  playTone(ctx, 1047, now, 0.05, vol, 'sine');
-  playTone(ctx, 1319, now + 0.05, 0.05, vol, 'sine');
-  playTone(ctx, 1568, now + 0.10, 0.1, vol * 0.8, 'sine');
-}
-
-function playBossHit(ctx: AudioContext): void {
-  // Impact: low thump + mid crack
-  const vol = currentVolume * 0.35;
-  const now = ctx.currentTime;
-  playTone(ctx, 100, now, 0.08, vol, 'sine');
-  playNoise(ctx, now + 0.02, 0.06, vol * 0.5);
-  playTone(ctx, 200, now + 0.05, 0.1, vol * 0.6, 'square');
-}
-
-function playBossAttack(ctx: AudioContext): void {
-  // Sweep down: alarm-like
-  const vol = currentVolume * 0.3;
-  const now = ctx.currentTime;
-  playSweep(ctx, 800, 200, now, 0.2, vol, 'sawtooth');
-}
-
-function playVictory(ctx: AudioContext): void {
-  // Fanfare: ascending major chord arpeggio
-  const vol = currentVolume * 0.25;
-  const now = ctx.currentTime;
-  playTone(ctx, 523, now, 0.1, vol, 'square');
-  playTone(ctx, 659, now + 0.1, 0.1, vol, 'square');
-  playTone(ctx, 784, now + 0.2, 0.1, vol, 'square');
-  playTone(ctx, 1047, now + 0.3, 0.2, vol * 1.3, 'square');
-}
-
-function playDamage(ctx: AudioContext): void {
-  // Hit: noise burst + low tone
-  const vol = currentVolume * 0.3;
-  const now = ctx.currentTime;
-  playNoise(ctx, now, 0.08, vol);
-  playTone(ctx, 150, now, 0.12, vol * 0.7, 'square');
-}
-
-function playDoor(ctx: AudioContext): void {
-  // Mechanical: sweep up
-  const vol = currentVolume * 0.2;
-  const now = ctx.currentTime;
-  playSweep(ctx, 200, 600, now, 0.25, vol, 'triangle');
-}
-
-function playInteract(ctx: AudioContext): void {
-  // Click: short blip
-  const vol = currentVolume * 0.2;
-  const now = ctx.currentTime;
-  playTone(ctx, 880, now, 0.04, vol, 'square');
-  playTone(ctx, 1100, now + 0.04, 0.03, vol * 0.7, 'square');
-}
-
-function playStep(ctx: AudioContext): void {
-  // Soft tap
-  const vol = currentVolume * 0.08;
-  const now = ctx.currentTime;
-  playNoise(ctx, now, 0.03, vol);
-}
-
-// ─── Primitives ───────────────────────────────────────────────────────────
-
-function playTone(
-  ctx: AudioContext,
-  freq: number,
-  startTime: number,
-  duration: number,
-  volume: number,
-  type: OscillatorType
-): void {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, startTime);
-  gain.gain.setValueAtTime(volume, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.01);
-}
-
-function playSweep(
-  ctx: AudioContext,
-  startFreq: number,
-  endFreq: number,
-  startTime: number,
-  duration: number,
-  volume: number,
-  type: OscillatorType
-): void {
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(startFreq, startTime);
-  osc.frequency.exponentialRampToValueAtTime(endFreq, startTime + duration);
-  gain.gain.setValueAtTime(volume, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.01);
-}
-
-function playNoise(
-  ctx: AudioContext,
-  startTime: number,
-  duration: number,
-  volume: number
-): void {
-  const bufferSize = Math.floor(ctx.sampleRate * duration);
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = Math.random() * 2 - 1;
-  }
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(volume, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-  source.connect(gain);
-  gain.connect(ctx.destination);
-  source.start(startTime);
-  source.stop(startTime + duration + 0.01);
+  zzfx(...params);
 }

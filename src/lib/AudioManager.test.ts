@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+// Mock zzfx to avoid AudioContext requirement in test environment
+vi.mock('zzfx', () => ({
+  zzfx: vi.fn(),
+  ZZFX: { volume: 0.3, sampleRate: 44100, x: null },
+}));
+
 import {
   getAudioSettings,
   saveAudioSettings,
