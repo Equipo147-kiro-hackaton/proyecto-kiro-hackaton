@@ -59,16 +59,16 @@ export function isMuted(): boolean {
 
 export function getSoundAssets(): Array<{ key: SoundKey; path: string }> {
   return [
-    { key: 'sfx-step', path: 'assets/sounds/step.mp3' },
-    { key: 'sfx-interact', path: 'assets/sounds/interact.mp3' },
-    { key: 'sfx-correct', path: 'assets/sounds/correct.mp3' },
-    { key: 'sfx-incorrect', path: 'assets/sounds/incorrect.mp3' },
-    { key: 'sfx-fragment', path: 'assets/sounds/fragment.mp3' },
-    { key: 'sfx-boss-hit', path: 'assets/sounds/boss-hit.mp3' },
-    { key: 'sfx-boss-attack', path: 'assets/sounds/boss-attack.mp3' },
-    { key: 'sfx-victory', path: 'assets/sounds/victory.mp3' },
-    { key: 'sfx-damage', path: 'assets/sounds/damage.mp3' },
-    { key: 'sfx-door', path: 'assets/sounds/door.mp3' },
+    { key: 'sfx-step', path: 'assets/sounds/step.ogg' },
+    { key: 'sfx-interact', path: 'assets/sounds/interact.ogg' },
+    { key: 'sfx-correct', path: 'assets/sounds/correct.ogg' },
+    { key: 'sfx-incorrect', path: 'assets/sounds/incorrect.ogg' },
+    { key: 'sfx-fragment', path: 'assets/sounds/fragment.ogg' },
+    { key: 'sfx-boss-hit', path: 'assets/sounds/boss-hit.ogg' },
+    { key: 'sfx-boss-attack', path: 'assets/sounds/boss-attack.ogg' },
+    { key: 'sfx-victory', path: 'assets/sounds/victory.ogg' },
+    { key: 'sfx-damage', path: 'assets/sounds/damage.ogg' },
+    { key: 'sfx-door', path: 'assets/sounds/door.ogg' },
   ];
 }
 

@@ -84,6 +84,25 @@ export class BootScene extends Phaser.Scene {
     if (!this.textures.exists('hero')) {
       this.load.spritesheet('hero', 'assets/sprites/hero-spritesheet.png', { frameWidth: 16, frameHeight: 16 });
     }
+
+    // Load SFX audio files (Kenney CC0)
+    const sfxFiles = [
+      { key: 'sfx-step', path: 'assets/sounds/step.ogg' },
+      { key: 'sfx-interact', path: 'assets/sounds/interact.ogg' },
+      { key: 'sfx-correct', path: 'assets/sounds/correct.ogg' },
+      { key: 'sfx-incorrect', path: 'assets/sounds/incorrect.ogg' },
+      { key: 'sfx-fragment', path: 'assets/sounds/fragment.ogg' },
+      { key: 'sfx-boss-hit', path: 'assets/sounds/boss-hit.ogg' },
+      { key: 'sfx-boss-attack', path: 'assets/sounds/boss-attack.ogg' },
+      { key: 'sfx-victory', path: 'assets/sounds/victory.ogg' },
+      { key: 'sfx-damage', path: 'assets/sounds/damage.ogg' },
+      { key: 'sfx-door', path: 'assets/sounds/door.ogg' },
+    ];
+    for (const sfx of sfxFiles) {
+      if (!this.cache.audio.exists(sfx.key)) {
+        this.load.audio(sfx.key, sfx.path);
+      }
+    }
   }
 
   create(): void {
