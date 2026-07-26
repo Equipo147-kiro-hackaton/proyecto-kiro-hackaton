@@ -41,7 +41,7 @@ export class VictoryScene extends Phaser.Scene {
     // Title in gold
     this.add.text(480, 70, t('victory.title'), {
       fontSize: '36px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffcc00',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -49,14 +49,14 @@ export class VictoryScene extends Phaser.Scene {
     // Congratulatory message
     this.add.text(480, 130, t('victory.message'), {
       fontSize: '16px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffffff',
     }).setOrigin(0.5);
 
     // Final Score
     this.add.text(480, 200, t('victory.final_score', { score: this.victoryData.score }), {
       fontSize: '24px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -64,14 +64,14 @@ export class VictoryScene extends Phaser.Scene {
     // Bugs Defeated
     this.add.text(480, 250, t('victory.bugs_defeated', { count: this.victoryData.bugsDefeated }), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Puzzles Solved
     this.add.text(480, 290, t('victory.puzzles_solved', { count: this.victoryData.puzzlesSolved }), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
   }
@@ -83,7 +83,7 @@ export class VictoryScene extends Phaser.Scene {
     // New Run button
     const newRunBtn = this.add.text(480, 380, t('victory.new_run'), {
       fontSize: '22px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#44ff44',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -95,7 +95,7 @@ export class VictoryScene extends Phaser.Scene {
     // View Leaderboard button
     const leaderboardBtn = this.add.text(480, 440, t('victory.view_leaderboard'), {
       fontSize: '22px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#66ccff',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });

@@ -72,36 +72,36 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 ## Phase 1 — Visual Foundation
 
 ### 1.A Hero variants
-- [ ] 1.A.1 SpriteGenerator produces 3 palette-driven variants — R1.1
-- [ ] 1.A.2 Textures `hero-classic`, `hero-devops`, `hero-cyberpunk` — R1.1
-- [ ] 1.A.3 Hero entity accepts textureKey parameter — R1.1
-- [ ] 1.A.4 ExplorationScene selects variant from difficulty — R1.1
+- [x] 1.A.1 SpriteGenerator produces 3 palette-driven variants — R1.1
+- [x] 1.A.2 Textures `hero-classic`, `hero-devops`, `hero-cyberpunk` — R1.1
+- [x] 1.A.3 Hero entity accepts textureKey parameter — R1.1
+- [x] 1.A.4 ExplorationScene selects variant from difficulty — R1.1
 
 ### 1.B Object sprites
-- [ ] 1.B.1 Place obj-* sprites at interactable positions — R1.2
-- [ ] 1.B.2 Correct depth ordering — R1.2
+- [x] 1.B.1 Place obj-* sprites at interactable positions — R1.2
+- [x] 1.B.2 Correct depth ordering — R1.2
 
 ### 1.C Enemies
-- [ ] 1.C.1 Generate 4 bug sprite variants — R1.3
-- [ ] 1.C.2 Enemy entity with patrol — R1.3
-- [ ] 1.C.3 Contact -15 HP + shake + audio — R1.3
-- [ ] 1.C.4 Update tech.md with enemy contact formula — CR3
+- [x] 1.C.1 Generate 4 bug sprite variants — R1.3
+- [x] 1.C.2 Enemy entity with patrol — R1.3
+- [x] 1.C.3 Contact -15 HP + shake + audio — R1.3
+- [x] 1.C.4 Update tech.md with enemy contact formula — CR3
 
 ### 1.D Lighting
-- [ ] 1.D.1 Vignette overlay — R1.4
-- [ ] 1.D.2 Warm/cool glows per object type — R1.4
-- [ ] 1.D.3 Per-scenario tint — R1.4
+- [x] 1.D.1 Vignette overlay — R1.4
+- [x] 1.D.2 Warm/cool glows per object type — R1.4
+- [x] 1.D.3 Per-scenario tint — R1.4
 
 ### 1.E Minimap
-- [ ] 1.E.1 100x100 minimap overlay — R1.5
+- [x] 1.E.1 100x100 minimap overlay — R1.5
 
 ### 1.F Pixel-art font
-- [ ] 1.F.1 Add CC0 pixel font + @font-face — R1.6
-- [ ] 1.F.2 Replace monospace globally — R1.6
+- [x] 1.F.1 Add CC0 pixel font + @font-face — R1.6
+- [x] 1.F.2 Replace monospace globally — R1.6
 
 ### 1.G Phase 1 acceptance
-- [ ] 1.G.1 Screenshot comparison to reference
-- [ ] 1.G.2 Commit + tag `phase-1-complete`
+- [x] 1.G.1 Screenshot comparison to reference
+- [x] 1.G.2 Commit + tag `phase-1-complete`
 
 ---
 

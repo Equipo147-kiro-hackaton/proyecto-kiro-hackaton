@@ -71,7 +71,7 @@ export class LoginScene extends Phaser.Scene {
   private createLanguageToggle(): void {
     this.languageToggleBtn = this.add
       .text(920, 24, `\ud83c\udf10 ${getLocale().toUpperCase()}`, {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.ACCENT_GOLD,
         fontStyle: 'bold',
@@ -91,7 +91,7 @@ export class LoginScene extends Phaser.Scene {
   private createTitle(): void {
     this.titleText = this.add
       .text(480, 80, '', {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '28px',
         color: COLORS.TEXT_WHITE,
         fontStyle: 'bold',
@@ -112,7 +112,7 @@ export class LoginScene extends Phaser.Scene {
     this.time.delayedCall(fullTitle.length * 50 + 200, () => {
       this.subtitleText = this.add
         .text(480, 120, t('login.subtitle'), {
-          fontFamily: 'monospace',
+          fontFamily: 'Press Start 2P, monospace',
           fontSize: '14px',
           color: COLORS.PRIMARY_CYAN,
         })
@@ -131,7 +131,7 @@ export class LoginScene extends Phaser.Scene {
   private createForm(): void {
     this.promptText = this.add
       .text(480, 180, t('login.prompt'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.TEXT_DIM,
       })
@@ -173,7 +173,7 @@ export class LoginScene extends Phaser.Scene {
 
     this.loginButton = this.add
       .text(480, 290, t('login.button'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '18px',
         color: COLORS.SUCCESS_GREEN,
         fontStyle: 'bold',
@@ -197,7 +197,7 @@ export class LoginScene extends Phaser.Scene {
 
     this.errorText = this.add
       .text(480, 330, '', {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '12px',
         color: COLORS.DANGER_RED,
         wordWrap: { width: 400 },
@@ -207,7 +207,7 @@ export class LoginScene extends Phaser.Scene {
 
     this.footerHintText = this.add
       .text(480, 500, t('login.footer_hint'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '9px',
         color: COLORS.TEXT_MUTED,
       })
@@ -251,7 +251,7 @@ export class LoginScene extends Phaser.Scene {
 
     this.add
       .text(480, 370, t('login.personal_best', { score: profile.personalBest }), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.ACCENT_GOLD,
       })

@@ -47,29 +47,29 @@ export class BossFightScene extends Phaser.Scene {
   private buildUI(): void {
     const w = this.cameras.main.width, h = this.cameras.main.height;
     this.add.rectangle(w / 2, h / 2, w, h, 0x0a0a1a);
-    this.add.text(w / 2, 30, this.sceneData.bossName, { fontSize: '16px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(w / 2, 30, this.sceneData.bossName, { fontSize: '16px', fontFamily: 'Press Start 2P, monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
     this.add.rectangle(w / 2, 55, 300, 16, 0x333333);
     this.bossHPBar = this.add.rectangle(w / 2 - 150, 55, 300, 14, 0xff3333).setOrigin(0, 0.5);
-    this.heartsText = this.add.text(w / 2, 80, this.getHeartsDisplay(), { fontSize: '18px', fontFamily: 'monospace', color: '#ff3366' }).setOrigin(0.5);
-    this.add.text(w / 2, 110, t('boss.place_in_order'), { fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa' }).setOrigin(0.5);
+    this.heartsText = this.add.text(w / 2, 80, this.getHeartsDisplay(), { fontSize: '18px', fontFamily: 'Press Start 2P, monospace', color: '#ff3366' }).setOrigin(0.5);
+    this.add.text(w / 2, 110, t('boss.place_in_order'), { fontSize: '10px', fontFamily: 'Press Start 2P, monospace', color: '#aaaaaa' }).setOrigin(0.5);
 
     this.placedSlots = [];
     for (let i = 0; i < this.fragments.length; i++) {
-      const slot = this.add.text(w / 2 - 150 + i * (300 / this.fragments.length), 135, `[${i + 1}]`, { fontSize: '9px', fontFamily: 'monospace', color: '#444444', backgroundColor: '#1a1a2e', padding: { x: 2, y: 2 } });
+      const slot = this.add.text(w / 2 - 150 + i * (300 / this.fragments.length), 135, `[${i + 1}]`, { fontSize: '9px', fontFamily: 'Press Start 2P, monospace', color: '#444444', backgroundColor: '#1a1a2e', padding: { x: 2, y: 2 } });
       this.placedSlots.push(slot);
     }
 
     this.fragmentButtons = [];
     for (let i = 0; i < this.shuffledFragments.length; i++) {
       const frag = this.shuffledFragments[i];
-      const btn = this.add.text(w / 2, 180 + i * 30, frag.content, { fontSize: '11px', fontFamily: 'monospace', color: '#ffffff', backgroundColor: '#2a2a4a', padding: { x: 8, y: 4 } }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      const btn = this.add.text(w / 2, 180 + i * 30, frag.content, { fontSize: '11px', fontFamily: 'Press Start 2P, monospace', color: '#ffffff', backgroundColor: '#2a2a4a', padding: { x: 8, y: 4 } }).setOrigin(0.5).setInteractive({ useHandCursor: true });
       btn.on('pointerover', () => btn.setBackgroundColor('#3a3a6a'));
       btn.on('pointerout', () => btn.setBackgroundColor('#2a2a4a'));
       btn.on('pointerdown', () => this.onSelect(frag, btn));
       this.fragmentButtons.push(btn);
     }
 
-    this.add.text(w / 2, h - 20, t('boss.forfeit_hint'), { fontSize: '8px', fontFamily: 'monospace', color: '#666666' }).setOrigin(0.5);
+    this.add.text(w / 2, h - 20, t('boss.forfeit_hint'), { fontSize: '8px', fontFamily: 'Press Start 2P, monospace', color: '#666666' }).setOrigin(0.5);
     this.input.keyboard?.on('keydown-ESC', () => this.onDefeat());
   }
 
@@ -109,7 +109,7 @@ export class BossFightScene extends Phaser.Scene {
 
   private onVictory(): void {
     playSFX(this, 'sfx-victory');
-    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.defeated'), { fontSize: '20px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.defeated'), { fontSize: '20px', fontFamily: 'Press Start 2P, monospace', color: '#44ff44', fontStyle: 'bold' }).setOrigin(0.5);
     this.time.delayedCall(2000, () => {
       if (this.sceneData.currentLevel >= getTotalLevels()) {
         this.scene.start('VictoryScene', {
@@ -125,7 +125,7 @@ export class BossFightScene extends Phaser.Scene {
   }
 
   private onDefeat(): void {
-    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.player_defeated'), { fontSize: '20px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.player_defeated'), { fontSize: '20px', fontFamily: 'Press Start 2P, monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
     this.time.delayedCall(2000, () => { this.scene.start('GameOverScene', { score: this.sceneData.score, levelReached: this.sceneData.currentLevel, bugsDefeated: 0, puzzlesSolved: 0 }); });
   }
 

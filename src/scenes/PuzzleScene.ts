@@ -94,24 +94,24 @@ export class PuzzleScene extends Phaser.Scene {
     // Title — category badge (top-left)
     const categoryLabel = this.puzzle.category.toUpperCase();
     this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 16, t('puzzle.category_badge', { category: categoryLabel }), {
-      fontSize: '14px', fontFamily: 'monospace', color: '#4488ff', fontStyle: 'bold',
+      fontSize: '14px', fontFamily: 'Press Start 2P, monospace', color: '#4488ff', fontStyle: 'bold',
     });
 
     // Timer (top-right, large and visible)
     this.timerText = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 16, '60s', {
-      fontSize: '18px', fontFamily: 'monospace', color: '#ffcc00', fontStyle: 'bold',
+      fontSize: '18px', fontFamily: 'Press Start 2P, monospace', color: '#ffcc00', fontStyle: 'bold',
     }).setOrigin(1, 0);
 
     // Difficulty badge
     const diffColors: Record<DifficultyMode, string> = { beginner: '#44cc44', normal: '#cccc44', hard: '#cc4444' };
     this.add.text(cx, cy - panelH / 2 + 16, this.difficulty.toUpperCase(), {
-      fontSize: '11px', fontFamily: 'monospace', color: diffColors[this.difficulty],
+      fontSize: '11px', fontFamily: 'Press Start 2P, monospace', color: diffColors[this.difficulty],
       backgroundColor: '#1a1a2e', padding: { x: 8, y: 3 },
     }).setOrigin(0.5, 0);
 
     // Question text (centered, readable size)
     this.add.text(cx, cy - panelH / 2 + 60, this.puzzle.question, {
-      fontSize: '14px', fontFamily: 'monospace', color: '#ffffff',
+      fontSize: '14px', fontFamily: 'Press Start 2P, monospace', color: '#ffffff',
       wordWrap: { width: panelW - 60 }, align: 'center', lineSpacing: 4,
     }).setOrigin(0.5, 0);
 
@@ -119,7 +119,7 @@ export class PuzzleScene extends Phaser.Scene {
     const answer = this.puzzle.correctAnswer;
     const underscores = answer.split('').map(c => c === ' ' ? '   ' : ' _ ').join('');
     this.hangmanText = this.add.text(cx, cy + 20, underscores, {
-      fontSize: '16px', fontFamily: 'monospace', color: '#555588',
+      fontSize: '16px', fontFamily: 'Press Start 2P, monospace', color: '#555588',
     }).setOrigin(0.5);
 
     // Build input area based on difficulty
@@ -131,18 +131,18 @@ export class PuzzleScene extends Phaser.Scene {
 
     // Hint text (bottom area)
     this.hintText = this.add.text(cx, cy + panelH / 2 - 50, '', {
-      fontSize: '12px', fontFamily: 'monospace', color: '#ffcc88',
+      fontSize: '12px', fontFamily: 'Press Start 2P, monospace', color: '#ffcc88',
       wordWrap: { width: panelW - 60 }, align: 'center',
     }).setOrigin(0.5);
 
     // Feedback text
     this.feedbackText = this.add.text(cx, cy + panelH / 2 - 24, '', {
-      fontSize: '16px', fontFamily: 'monospace', fontStyle: 'bold',
+      fontSize: '16px', fontFamily: 'Press Start 2P, monospace', fontStyle: 'bold',
     }).setOrigin(0.5).setAlpha(0);
 
     // Close button (top-right X)
     const closeBtn = this.add.text(cx + panelW / 2 - 12, cy - panelH / 2 + 10, t('puzzle.close'), {
-      fontSize: '16px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold',
+      fontSize: '16px', fontFamily: 'Press Start 2P, monospace', color: '#ff4444', fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => this.handleClose());
 
@@ -164,7 +164,7 @@ export class PuzzleScene extends Phaser.Scene {
       const label = `${String.fromCharCode(65 + idx)}) ${truncated}`;
 
       const btn = this.add.text(cx, btnY, label, {
-        fontSize: '13px', fontFamily: 'monospace', color: '#dddddd',
+        fontSize: '13px', fontFamily: 'Press Start 2P, monospace', color: '#dddddd',
         backgroundColor: '#2a2a4a', padding: { x: 16, y: 8 },
         fixedWidth: panelW - 100,
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -271,7 +271,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.answerDOM = this.add.dom(cx, cy + 60, this.answerInput);
 
     const submitBtn = this.add.text(cx, cy + 110, t('puzzle.submit'), {
-      fontSize: '16px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold',
+      fontSize: '16px', fontFamily: 'Press Start 2P, monospace', color: '#44ff44', fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     submitBtn.on('pointerover', () => submitBtn.setColor('#88ff88'));
     submitBtn.on('pointerout', () => submitBtn.setColor('#44ff44'));

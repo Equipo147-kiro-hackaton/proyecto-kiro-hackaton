@@ -82,7 +82,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createLanguageToggle(): void {
     this.languageToggleBtn = this.add
       .text(920, 24, `\ud83c\udf10 ${getLocale().toUpperCase()}`, {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.ACCENT_GOLD,
         fontStyle: 'bold',
@@ -108,7 +108,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.titleText = this.add
       .text(480, 50, t('menu.title'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '22px',
         color: COLORS.TEXT_WHITE,
         fontStyle: 'bold',
@@ -117,7 +117,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.welcomeText = this.add
       .text(480, 82, t('menu.welcome', { username, best: personalBest }), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '12px',
         color: COLORS.ACCENT_GOLD,
       })
@@ -131,7 +131,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createDifficultySelection(): void {
     this.selectDifficultyText = this.add
       .text(480, 120, t('menu.select_difficulty'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '11px',
         color: COLORS.TEXT_DIM,
       })
@@ -170,7 +170,7 @@ export class MainMenuScene extends Phaser.Scene {
 
       const btn = this.add
         .text(480, y, `[ ${t(m.labelKey)} ]`, {
-          fontFamily: 'monospace',
+          fontFamily: 'Press Start 2P, monospace',
           fontSize: '16px',
           color: m.color,
           fontStyle: 'bold',
@@ -180,7 +180,7 @@ export class MainMenuScene extends Phaser.Scene {
 
       const desc = this.add
         .text(480, y + 18, t(m.descKey), {
-          fontFamily: 'monospace',
+          fontFamily: 'Press Start 2P, monospace',
           fontSize: '9px',
           color: COLORS.TEXT_MUTED,
         })
@@ -207,7 +207,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createActions(): void {
     this.newRunBtn = this.add
       .text(480, 325, t('menu.new_run'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '18px',
         color: COLORS.SUCCESS_GREEN,
         fontStyle: 'bold',
@@ -232,7 +232,7 @@ export class MainMenuScene extends Phaser.Scene {
     if (getMostRecentSave('beginner') || getMostRecentSave('normal')) {
       this.continueBtn = this.add
         .text(480, 365, t('menu.continue'), {
-          fontFamily: 'monospace',
+          fontFamily: 'Press Start 2P, monospace',
           fontSize: '14px',
           color: COLORS.PRIMARY_CYAN,
           fontStyle: 'bold',
@@ -247,7 +247,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.leaderboardBtn = this.add
       .text(480, 410, t('menu.leaderboard'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.PRIMARY_BLUE,
         fontStyle: 'bold',
@@ -263,7 +263,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createFooter(): void {
     this.footerHintText = this.add
       .text(480, 500, t('menu.footer_hint'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '9px',
         color: COLORS.TEXT_MUTED,
       })

@@ -72,19 +72,20 @@ export class Hero extends Phaser.GameObjects.Sprite {
    */
   private createAnimations(): void {
     const anims = this.scene.anims;
+    const texKey = this.texture.key;
 
     const directions: Array<{ key: string; row: number }> = [
-      { key: 'hero-walk-down', row: 0 },
-      { key: 'hero-walk-left', row: 1 },
-      { key: 'hero-walk-right', row: 2 },
-      { key: 'hero-walk-up', row: 3 },
+      { key: `${texKey}-walk-down`, row: 0 },
+      { key: `${texKey}-walk-left`, row: 1 },
+      { key: `${texKey}-walk-right`, row: 2 },
+      { key: `${texKey}-walk-up`, row: 3 },
     ];
 
     for (const dir of directions) {
       if (!anims.exists(dir.key)) {
         anims.create({
           key: dir.key,
-          frames: anims.generateFrameNumbers('hero', {
+          frames: anims.generateFrameNumbers(texKey, {
             start: dir.row * 4,
             end: dir.row * 4 + 3,
           }),
@@ -96,24 +97,24 @@ export class Hero extends Phaser.GameObjects.Sprite {
 
     // Idle frames (first frame of each direction)
     const idles: Array<{ key: string; frame: number }> = [
-      { key: 'hero-idle-down', frame: 0 },
-      { key: 'hero-idle-left', frame: 4 },
-      { key: 'hero-idle-right', frame: 8 },
-      { key: 'hero-idle-up', frame: 12 },
+      { key: `${texKey}-idle-down`, frame: 0 },
+      { key: `${texKey}-idle-left`, frame: 4 },
+      { key: `${texKey}-idle-right`, frame: 8 },
+      { key: `${texKey}-idle-up`, frame: 12 },
     ];
 
     for (const idle of idles) {
       if (!anims.exists(idle.key)) {
         anims.create({
           key: idle.key,
-          frames: [{ key: 'hero', frame: idle.frame }],
+          frames: [{ key: texKey, frame: idle.frame }],
           frameRate: 1,
         });
       }
     }
 
     // Start with idle facing down
-    this.play('hero-idle-down');
+    this.play(`${texKey}-idle-down`);
   }
 
   /**
@@ -253,12 +254,14 @@ export class Hero extends Phaser.GameObjects.Sprite {
   }
 
   private playWalkAnimation(direction: Direction): void {
-    const animKeys = ['hero-walk-down', 'hero-walk-left', 'hero-walk-right', 'hero-walk-up'];
+    const texKey = this.texture.key;
+    const animKeys = [`${texKey}-walk-down`, `${texKey}-walk-left`, `${texKey}-walk-right`, `${texKey}-walk-up`];
     this.play(animKeys[direction], true);
   }
 
   private playIdleAnimation(): void {
-    const idleKeys = ['hero-idle-down', 'hero-idle-left', 'hero-idle-right', 'hero-idle-up'];
+    const texKey = this.texture.key;
+    const idleKeys = [`${texKey}-idle-down`, `${texKey}-idle-left`, `${texKey}-idle-right`, `${texKey}-idle-up`];
     this.play(idleKeys[this.facing], true);
   }
 }

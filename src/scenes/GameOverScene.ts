@@ -40,7 +40,7 @@ export class GameOverScene extends Phaser.Scene {
     // Title
     this.add.text(480, 80, t('gameover.title'), {
       fontSize: '40px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ff4444',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -48,7 +48,7 @@ export class GameOverScene extends Phaser.Scene {
     // Final Score
     this.add.text(480, 170, t('gameover.final_score', { score: this.gameOverData.score }), {
       fontSize: '24px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -56,21 +56,21 @@ export class GameOverScene extends Phaser.Scene {
     // Level Reached
     this.add.text(480, 220, t('gameover.level_reached', { level: this.gameOverData.levelReached }), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Bugs Defeated
     this.add.text(480, 260, t('gameover.bugs_defeated', { count: this.gameOverData.bugsDefeated }), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Puzzles Solved
     this.add.text(480, 300, t('gameover.puzzles_solved', { count: this.gameOverData.puzzlesSolved }), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
   }
@@ -82,7 +82,7 @@ export class GameOverScene extends Phaser.Scene {
     // New Run button
     const newRunBtn = this.add.text(480, 390, t('gameover.new_run'), {
       fontSize: '22px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#44ff44',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -94,7 +94,7 @@ export class GameOverScene extends Phaser.Scene {
     // View Leaderboard button
     const leaderboardBtn = this.add.text(480, 450, t('gameover.view_leaderboard'), {
       fontSize: '22px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#66ccff',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });

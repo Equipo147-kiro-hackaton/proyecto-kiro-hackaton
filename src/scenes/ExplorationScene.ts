@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Hero, Direction } from '@/entities/Hero';
+import { Enemy } from '@/entities/Enemy';
 import { InteractionIndicator } from '@/entities/InteractionIndicator';
 import { isTileWalkable } from '@/lib/TilemapHelper';
 import {
@@ -23,6 +24,7 @@ import { EventBus } from '@/lib/EventBus';
 import { generateAllSprites } from '@/lib/SpriteGenerator';
 import { generateProceduralMap, registerProceduralMap } from '@/lib/ProceduralMap';
 import { t } from '@/lib/i18n';
+import { HERO_VARIANT_BY_DIFFICULTY } from '@/types';
 import type { Interactable, DifficultyMode } from '@/types';
 
 /** Viewport width excluding the right HUD panel */
@@ -68,6 +70,14 @@ export class ExplorationScene extends Phaser.Scene {
   // Traps
   private traps: TrapTile[] = [];
   private trapGraphics!: Phaser.GameObjects.Graphics;
+
+  // Enemies
+  private enemies: Enemy[] = [];
+  private enemyContactCooldown = false;
+
+  // Minimap
+  private minimapGraphics!: Phaser.GameObjects.Graphics;
+  private exploredTiles: Set<string> = new Set();
 
   constructor() { super('ExplorationScene'); }
 
@@ -130,6 +140,7 @@ export class ExplorationScene extends Phaser.Scene {
     this.collisionLayer.setAlpha(0.5);
     this.collisionData = this.extractCollisionData();
     this.initInteractables();
+    this.placeObjectSprites();
 
     // Procedural elements
     this.decorationGraphics = this.add.graphics().setDepth(1);
@@ -137,6 +148,7 @@ export class ExplorationScene extends Phaser.Scene {
     this.trapGraphics = this.add.graphics().setDepth(2);
     this.generateDecoration(mc.scenario);
     this.generateTraps();
+    this.spawnEnemies();
     this.drawInteractableMarkers();
 
     this.spawnHero();
@@ -148,6 +160,9 @@ export class ExplorationScene extends Phaser.Scene {
     this.cameras.main.setZoom(2.5);
     this.cameras.main.startFollow(this.hero, true, 0.1, 0.1);
 
+    this.createLighting(mc.scenario);
+    this.createMinimap();
+
     this.setupInput();
     this.scene.launch('HUDScene');
     this.updateHUD();
@@ -158,6 +173,8 @@ export class ExplorationScene extends Phaser.Scene {
     this.updateInteractionIndicator();
     this.updateMarkerPulse();
     this.checkTrapCollision();
+    this.checkEnemyContact();
+    this.updateMinimap();
   }
 
   // ─── Procedural Decoration ──────────────────────────────────────────────
@@ -323,6 +340,189 @@ export class ExplorationScene extends Phaser.Scene {
     }
   }
 
+  // ─── Minimap ─────────────────────────────────────────────────────────────
+
+  private createMinimap(): void {
+    // 100x100 minimap in top-left of viewport, fixed (no scroll)
+    this.minimapGraphics = this.add.graphics().setDepth(110).setScrollFactor(0);
+    this.updateMinimap();
+  }
+
+  private updateMinimap(): void {
+    if (!this.hero) return;
+    const { tileX, tileY } = this.hero.getTilePosition();
+
+    // Mark surrounding tiles as explored (5x5 vision radius)
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        this.exploredTiles.add(`${tileX + dx},${tileY + dy}`);
+      }
+    }
+
+    this.minimapGraphics.clear();
+
+    const mapW = this.map.width;
+    const mapH = this.map.height;
+    const mmSize = 100;
+    const mmX = 4;
+    const mmY = 4;
+    const tileW = mmSize / mapW;
+    const tileH = mmSize / mapH;
+
+    // Background
+    this.minimapGraphics.fillStyle(0x000000, 0.6);
+    this.minimapGraphics.fillRect(mmX - 1, mmY - 1, mmSize + 2, mmSize + 2);
+    this.minimapGraphics.lineStyle(1, 0x4488ff, 0.5);
+    this.minimapGraphics.strokeRect(mmX - 1, mmY - 1, mmSize + 2, mmSize + 2);
+
+    // Draw explored tiles
+    for (const key of this.exploredTiles) {
+      const [tx, ty] = key.split(',').map(Number);
+      if (tx < 0 || tx >= mapW || ty < 0 || ty >= mapH) continue;
+
+      const walkable = isTileWalkable(this.collisionData, mapW, tx, ty);
+      if (walkable) {
+        this.minimapGraphics.fillStyle(0x334455, 0.8);
+      } else {
+        this.minimapGraphics.fillStyle(0x111122, 0.8);
+      }
+      this.minimapGraphics.fillRect(mmX + tx * tileW, mmY + ty * tileH, Math.max(tileW, 1), Math.max(tileH, 1));
+    }
+
+    // Draw interactables
+    for (const inter of this.interactables) {
+      if (inter.activated) continue;
+      if (!this.exploredTiles.has(`${inter.tileX},${inter.tileY}`)) continue;
+      const color = inter.type === 'door' ? 0xffcc00 : 0x00ccff;
+      this.minimapGraphics.fillStyle(color, 1);
+      this.minimapGraphics.fillRect(mmX + inter.tileX * tileW, mmY + inter.tileY * tileH, Math.max(tileW + 1, 2), Math.max(tileH + 1, 2));
+    }
+
+    // Draw hero position
+    this.minimapGraphics.fillStyle(0x44ff44, 1);
+    this.minimapGraphics.fillRect(mmX + tileX * tileW - 1, mmY + tileY * tileH - 1, 3, 3);
+  }
+
+  // ─── Lighting ────────────────────────────────────────────────────────────
+
+  private createLighting(scenario: ScenarioType): void {
+    const tw = this.map.tileWidth;
+    const th = this.map.tileHeight;
+
+    // 1. Per-scenario ambient tint overlay (scrolls with the map)
+    const tintColors: Record<ScenarioType, { color: number; alpha: number }> = {
+      office: { color: 0xffeedd, alpha: 0.04 },
+      server: { color: 0x0044ff, alpha: 0.06 },
+      cloud: { color: 0x8844ff, alpha: 0.05 },
+    };
+    const tint = tintColors[scenario] ?? tintColors.office;
+    const tintOverlay = this.add.graphics().setDepth(3);
+    tintOverlay.fillStyle(tint.color, tint.alpha);
+    tintOverlay.fillRect(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+
+    // 2. Warm/cool glows at interactable positions
+    const glowGraphics = this.add.graphics().setDepth(3);
+    for (const interactable of this.interactables) {
+      if (interactable.activated) continue;
+      const cx = interactable.tileX * tw + tw / 2;
+      const cy = interactable.tileY * th + th / 2;
+
+      if (interactable.type === 'door') {
+        // Warm golden glow
+        glowGraphics.fillStyle(0xffcc00, 0.08);
+        glowGraphics.fillCircle(cx, cy, 12);
+        glowGraphics.fillStyle(0xffcc00, 0.04);
+        glowGraphics.fillCircle(cx, cy, 20);
+      } else {
+        // Cool cyan glow
+        glowGraphics.fillStyle(0x00ccff, 0.07);
+        glowGraphics.fillCircle(cx, cy, 10);
+        glowGraphics.fillStyle(0x00ccff, 0.03);
+        glowGraphics.fillCircle(cx, cy, 18);
+      }
+    }
+
+    // 3. Vignette overlay (fixed to viewport, doesn't scroll)
+    const vignetteGraphics = this.add.graphics().setDepth(100).setScrollFactor(0);
+    const vw = GAME_VIEWPORT_WIDTH / 2.5; // account for zoom
+    const vh = 540 / 2.5;
+    // Draw radial darkness from edges
+    const steps = 6;
+    for (let i = 0; i < steps; i++) {
+      const alpha = 0.12 * (i / steps);
+      const inset = (steps - i) * 8;
+      vignetteGraphics.fillStyle(0x000000, alpha);
+      // Top edge
+      vignetteGraphics.fillRect(0, 0, vw, inset);
+      // Bottom edge
+      vignetteGraphics.fillRect(0, vh - inset, vw, inset);
+      // Left edge
+      vignetteGraphics.fillRect(0, 0, inset, vh);
+      // Right edge
+      vignetteGraphics.fillRect(vw - inset, 0, inset, vh);
+    }
+  }
+
+  // ─── Enemies ─────────────────────────────────────────────────────────────
+
+  private spawnEnemies(): void {
+    const enemyCount = 1 + this.currentLevel; // 2 on level 1, 3 on level 2, etc.
+    const tw = this.map.tileWidth;
+    const candidates: Array<{ x: number; y: number }> = [];
+
+    for (let y = 0; y < this.map.height; y++) {
+      for (let x = 0; x < this.map.width; x++) {
+        if (!isTileWalkable(this.collisionData, this.map.width, x, y)) continue;
+        if (this.interactables.some(i => i.tileX === x && i.tileY === y)) continue;
+        if (this.traps.some(t => t.tileX === x && t.tileY === y)) continue;
+        // Skip spawn area
+        if (x < 5 && y < 5) continue;
+        candidates.push({ x, y });
+      }
+    }
+
+    for (let i = 0; i < enemyCount && candidates.length > 0; i++) {
+      const idx = Math.floor(Math.random() * candidates.length);
+      const pos = candidates.splice(idx, 1)[0];
+      const variant = i % 4;
+      const enemy = new Enemy(this, pos.x, pos.y, tw, variant);
+      enemy.setCollisionCheck((tx, ty) => isTileWalkable(this.collisionData, this.map.width, tx, ty));
+      this.enemies.push(enemy);
+    }
+  }
+
+  private checkEnemyContact(): void {
+    if (!this.hero || this.enemyContactCooldown) return;
+    const { tileX, tileY } = this.hero.getTilePosition();
+
+    for (const enemy of this.enemies) {
+      if (enemy.isAtTile(tileX, tileY)) {
+        this.handleEnemyContact();
+        return;
+      }
+    }
+  }
+
+  private handleEnemyContact(): void {
+    this.enemyContactCooldown = true;
+    this.heroHP = Math.max(0, this.heroHP - 15);
+
+    screenShake(this, 8, 400);
+    screenFlash(this, 0xff0000, 250);
+    playSFX(this, 'sfx-damage');
+    floatingText(this, this.hero.x, this.hero.y - 12, '-15 HP', '#ff4444');
+
+    this.updateHUD();
+
+    if (this.heroHP <= 0) {
+      this.onDefeat();
+      return;
+    }
+
+    // 1.5s cooldown before next contact damage
+    this.time.delayedCall(1500, () => { this.enemyContactCooldown = false; });
+  }
+
   // ─── Hero & Input ───────────────────────────────────────────────────────
 
   private spawnHero(): void {
@@ -332,7 +532,7 @@ export class ExplorationScene extends Phaser.Scene {
       const sp = ol.objects.find((o) => Array.isArray(o.properties) && o.properties.some((p: { name: string; value: unknown }) => p.name === 'objectType' && p.value === 'spawn'));
       if (sp) { sx = Math.floor((sp.x ?? 0) / this.map.tileWidth); sy = Math.floor((sp.y ?? 0) / this.map.tileHeight); }
     }
-    this.hero = new Hero(this, sx, sy, this.map.tileWidth);
+    this.hero = new Hero(this, sx, sy, this.map.tileWidth, `hero-${HERO_VARIANT_BY_DIFFICULTY[this.difficulty]}`);
     this.hero.setCollisionCheck((tx, ty) => isTileWalkable(this.collisionData, this.map.width, tx, ty));
   }
 
@@ -360,6 +560,27 @@ export class ExplorationScene extends Phaser.Scene {
     if (!ol) return;
     const objs: TiledObjectData[] = ol.objects.map((o) => ({ id: o.id, name: o.name, type: o.type ?? '', x: o.x ?? 0, y: o.y ?? 0, width: o.width ?? 16, height: o.height ?? 16, properties: Array.isArray(o.properties) ? o.properties.map((p: { name: string; type: string; value: string | number | boolean }) => ({ name: p.name, type: p.type, value: p.value })) : undefined }));
     this.interactables = parseInteractables(objs, this.map.tileWidth, this.map.tileHeight);
+  }
+
+  private placeObjectSprites(): void {
+    const tw = this.map.tileWidth;
+    const th = this.map.tileHeight;
+    const typeToTexture: Record<string, string> = {
+      terminal: 'obj-terminal',
+      server: 'obj-server',
+      door: 'obj-door',
+      whiteboard: 'obj-desk',
+      checkpoint: 'obj-plant',
+    };
+
+    for (const interactable of this.interactables) {
+      const texKey = typeToTexture[interactable.type] ?? 'obj-terminal';
+      if (!this.textures.exists(texKey)) continue;
+
+      const px = interactable.tileX * tw + tw / 2;
+      const py = interactable.tileY * th + th / 2;
+      this.add.image(px, py, texKey).setDepth(5);
+    }
   }
 
   private updateInteractionIndicator(): void {

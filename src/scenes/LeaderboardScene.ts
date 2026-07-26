@@ -26,7 +26,7 @@ export class LeaderboardScene extends Phaser.Scene {
     // Title
     this.add.text(480, 40, t('leaderboard.title'), {
       fontSize: '32px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffcc00',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -34,14 +34,14 @@ export class LeaderboardScene extends Phaser.Scene {
     // Loading indicator
     this.loadingText = this.add.text(480, 270, t('leaderboard.loading'), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#aaaaaa',
     }).setOrigin(0.5);
 
     // Back button
     const backBtn = this.add.text(480, 500, t('leaderboard.back'), {
       fontSize: '20px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#66ccff',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -80,13 +80,13 @@ export class LeaderboardScene extends Phaser.Scene {
 
     const emptyText = this.add.text(480, 220, t('leaderboard.empty_title'), {
       fontSize: '20px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffcc00',
     }).setOrigin(0.5);
 
     const hintText = this.add.text(480, 260, t('leaderboard.empty_message'), {
       fontSize: '14px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#888888',
     }).setOrigin(0.5);
 
@@ -111,7 +111,7 @@ export class LeaderboardScene extends Phaser.Scene {
     // Table header
     const headerStyle: Phaser.Types.GameObjects.Text.TextStyle = {
       fontSize: '16px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ffcc00',
       fontStyle: 'bold',
     };
@@ -143,7 +143,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
       const rowStyle: Phaser.Types.GameObjects.Text.TextStyle = {
         fontSize: '15px',
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         color: textColor,
       };
 
@@ -169,7 +169,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
     const errorText = this.add.text(480, 240, t('leaderboard.error'), {
       fontSize: '18px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#ff6666',
     }).setOrigin(0.5);
 
@@ -177,7 +177,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
     const retryBtn = this.add.text(480, 300, t('leaderboard.retry'), {
       fontSize: '20px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: '#44ff44',
       fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });

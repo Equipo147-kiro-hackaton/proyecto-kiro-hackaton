@@ -104,7 +104,7 @@ export class HUDScene extends Phaser.Scene {
 
     this.levelText = this.add.text(x, 16, t('level.1.name'), {
       fontSize: '10px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_WHITE,
       fontStyle: 'bold',
       align: 'center',
@@ -113,7 +113,7 @@ export class HUDScene extends Phaser.Scene {
 
     this.modeBadge = this.add.text(x, 44, t('menu.difficulty.normal'), {
       fontSize: '8px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.DIFFICULTY_NORMAL,
       backgroundColor: '#1a1a2e',
       padding: { x: 6, y: 2 },
@@ -130,7 +130,7 @@ export class HUDScene extends Phaser.Scene {
 
     this.hpLabel = this.add.text(x, y, t('hud.hp'), {
       fontSize: '8px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
     });
 
@@ -138,7 +138,7 @@ export class HUDScene extends Phaser.Scene {
     for (let i = 0; i < this.maxHearts; i++) {
       const heart = this.add.text(x + 22 + i * 18, y - 2, '\u2665', {
         fontSize: '14px',
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         color: COLORS.HUD_HEARTS,
       });
       this.hearts.push(heart);
@@ -183,13 +183,13 @@ export class HUDScene extends Phaser.Scene {
 
     this.scoreLabel = this.add.text(x, y, t('hud.score'), {
       fontSize: '8px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
     });
 
     this.scoreText = this.add.text(PANEL_X + PANEL_WIDTH - 12, y, '0', {
       fontSize: '12px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.HUD_SCORE,
       fontStyle: 'bold',
     }).setOrigin(1, 0);
@@ -217,13 +217,13 @@ export class HUDScene extends Phaser.Scene {
 
     this.fragmentsLabel = this.add.text(x, y, t('hud.fragments'), {
       fontSize: '8px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
     });
 
     this.fragmentCountText = this.add.text(PANEL_X + PANEL_WIDTH - 12, y, '0/0', {
       fontSize: '9px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.HUD_FRAGMENTS,
     }).setOrigin(1, 0);
 
@@ -275,13 +275,13 @@ export class HUDScene extends Phaser.Scene {
 
     this.statusLabel = this.add.text(x, y, t('hud.status'), {
       fontSize: '8px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
     });
 
     this.statusText = this.add.text(x, y + 14, t('hud.status_default'), {
       fontSize: '9px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
       lineSpacing: 2,
       wordWrap: { width: PANEL_WIDTH - 24 },
@@ -298,13 +298,13 @@ export class HUDScene extends Phaser.Scene {
 
     this.controlsLabel = this.add.text(x, y, t('hud.controls'), {
       fontSize: '7px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_MUTED,
     });
 
     this.controlsText = this.add.text(x, y + 12, t('hud.controls_list'), {
       fontSize: '7px',
-      fontFamily: 'monospace',
+      fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_MUTED,
       lineSpacing: 3,
     });
@@ -315,7 +315,7 @@ export class HUDScene extends Phaser.Scene {
   private createSaveIndicator(): void {
     this.saveIndicator = this.add.text(
       PANEL_X + PANEL_WIDTH / 2, 520, '',
-      { fontSize: '8px', fontFamily: 'monospace', color: COLORS.SUCCESS_GREEN }
+      { fontSize: '8px', fontFamily: 'Press Start 2P, monospace', color: COLORS.SUCCESS_GREEN }
     ).setOrigin(0.5).setAlpha(0);
   }
 

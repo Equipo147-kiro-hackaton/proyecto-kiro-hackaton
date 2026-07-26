@@ -51,7 +51,7 @@ export class TutorialScene extends Phaser.Scene {
 
     this.titleText = this.add
       .text(480, 60, t('tutorial.title'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '28px',
         color: COLORS.PRIMARY_CYAN,
         fontStyle: 'bold',
@@ -64,7 +64,7 @@ export class TutorialScene extends Phaser.Scene {
 
     this.stepText = this.add
       .text(480, 250, '', {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '18px',
         color: COLORS.TEXT_WHITE,
         align: 'center',
@@ -75,7 +75,7 @@ export class TutorialScene extends Phaser.Scene {
 
     this.nextButton = this.add
       .text(480, 420, t('tutorial.next'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '18px',
         color: COLORS.SUCCESS_GREEN,
         fontStyle: 'bold',
@@ -89,7 +89,7 @@ export class TutorialScene extends Phaser.Scene {
 
     this.skipButton = this.add
       .text(480, 465, t('tutorial.skip'), {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '12px',
         color: COLORS.TEXT_DIM,
       })
@@ -102,7 +102,7 @@ export class TutorialScene extends Phaser.Scene {
 
     this.progressText = this.add
       .text(480, 500, '', {
-        fontFamily: 'monospace',
+        fontFamily: 'Press Start 2P, monospace',
         fontSize: '11px',
         color: COLORS.TEXT_MUTED,
       })

@@ -80,35 +80,35 @@ export const COLORS_HEX = {
 export const TEXT_STYLES = {
   TITLE: {
     fontSize: '24px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.TEXT_WHITE,
     fontStyle: 'bold',
   },
   SUBTITLE: {
     fontSize: '14px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.TEXT_DIM,
   },
   BUTTON: {
     fontSize: '16px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.PRIMARY_CYAN,
     fontStyle: 'bold',
   },
   BUTTON_DANGER: {
     fontSize: '16px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.DANGER_RED,
     fontStyle: 'bold',
   },
   HUD: {
     fontSize: '10px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.TEXT_WHITE,
   },
   SCORE_POPUP: {
     fontSize: '12px',
-    fontFamily: 'monospace',
+    fontFamily: 'Press Start 2P, monospace',
     color: COLORS.ACCENT_GOLD,
     fontStyle: 'bold',
   },
