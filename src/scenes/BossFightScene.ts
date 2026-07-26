@@ -5,6 +5,7 @@ import { getDifficultyConfig } from '@/systems/DifficultySystem';
 import { getTotalLevels } from '@/systems/MapLoader';
 import { playSFX } from '@/lib/AudioManager';
 import { screenShake, screenFlash, floatingText, bossDamageFlash } from '@/systems/FeedbackSystem';
+import { t } from '@/lib/i18n';
 import type { DifficultyMode, Fragment } from '@/types';
 
 interface BossSceneData {
@@ -50,7 +51,7 @@ export class BossFightScene extends Phaser.Scene {
     this.add.rectangle(w / 2, 55, 300, 16, 0x333333);
     this.bossHPBar = this.add.rectangle(w / 2 - 150, 55, 300, 14, 0xff3333).setOrigin(0, 0.5);
     this.heartsText = this.add.text(w / 2, 80, this.getHeartsDisplay(), { fontSize: '18px', fontFamily: 'monospace', color: '#ff3366' }).setOrigin(0.5);
-    this.add.text(w / 2, 110, 'Place fragments in correct pipeline order:', { fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa' }).setOrigin(0.5);
+    this.add.text(w / 2, 110, t('boss.place_in_order'), { fontSize: '10px', fontFamily: 'monospace', color: '#aaaaaa' }).setOrigin(0.5);
 
     this.placedSlots = [];
     for (let i = 0; i < this.fragments.length; i++) {
@@ -68,7 +69,7 @@ export class BossFightScene extends Phaser.Scene {
       this.fragmentButtons.push(btn);
     }
 
-    this.add.text(w / 2, h - 20, 'Click fragments in order | ESC to forfeit', { fontSize: '8px', fontFamily: 'monospace', color: '#666666' }).setOrigin(0.5);
+    this.add.text(w / 2, h - 20, t('boss.forfeit_hint'), { fontSize: '8px', fontFamily: 'monospace', color: '#666666' }).setOrigin(0.5);
     this.input.keyboard?.on('keydown-ESC', () => this.onDefeat());
   }
 
@@ -81,14 +82,14 @@ export class BossFightScene extends Phaser.Scene {
       const idx = this.state.nextSlotIndex - 1;
       if (this.placedSlots[idx]) { this.placedSlots[idx].setText(fragment.content.substring(0, 10)); this.placedSlots[idx].setColor('#44ff44'); }
       bossDamageFlash(this, this.cameras.main.width / 2, 55, 300, 16);
-      if (result.isCritical) floatingText(this, this.cameras.main.width / 2, 40, 'CRITICAL!', '#ffdd00');
+      if (result.isCritical) floatingText(this, this.cameras.main.width / 2, 40, t('boss.critical'), '#ffdd00');
       floatingText(this, this.cameras.main.width / 2 + 100, 55, `-${result.damageDealt}%`, '#ff4444');
       this.bossHPBar.setDisplaySize(300 * (this.state.bossHP / 100), 14);
       if (result.victory) this.onVictory();
     } else {
       playSFX(this, 'sfx-boss-attack'); screenShake(this, 4); screenFlash(this, 0xff0000, 200);
       this.heartsText.setText(this.getHeartsDisplay());
-      floatingText(this, this.cameras.main.width / 2, 90, '-1 \u2665', '#ff4444');
+      floatingText(this, this.cameras.main.width / 2, 90, t('boss.heart_lost'), '#ff4444');
       if (result.defeat) this.onDefeat();
     }
   }
@@ -100,7 +101,7 @@ export class BossFightScene extends Phaser.Scene {
         const r = bossAutoAttack(this.state);
         playSFX(this, 'sfx-boss-attack'); screenShake(this, 5); screenFlash(this, 0xff0000, 300);
         this.heartsText.setText(this.getHeartsDisplay());
-        floatingText(this, this.cameras.main.width / 2, 90, 'Boss Attack!', '#ff4444');
+        floatingText(this, this.cameras.main.width / 2, 90, t('boss.attack'), '#ff4444');
         if (r.defeat) this.onDefeat();
       }
     }});
@@ -108,7 +109,7 @@ export class BossFightScene extends Phaser.Scene {
 
   private onVictory(): void {
     playSFX(this, 'sfx-victory');
-    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'BOSS DEFEATED!', { fontSize: '20px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.defeated'), { fontSize: '20px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold' }).setOrigin(0.5);
     this.time.delayedCall(2000, () => {
       if (this.sceneData.currentLevel >= getTotalLevels()) {
         this.scene.start('VictoryScene', {
@@ -124,7 +125,7 @@ export class BossFightScene extends Phaser.Scene {
   }
 
   private onDefeat(): void {
-    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'DEFEATED', { fontSize: '20px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
+    this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, t('boss.player_defeated'), { fontSize: '20px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold' }).setOrigin(0.5);
     this.time.delayedCall(2000, () => { this.scene.start('GameOverScene', { score: this.sceneData.score, levelReached: this.sceneData.currentLevel, bugsDefeated: 0, puzzlesSolved: 0 }); });
   }
 

@@ -22,6 +22,7 @@ import { COLORS_HEX } from '@/lib/Colors';
 import { EventBus } from '@/lib/EventBus';
 import { generateAllSprites } from '@/lib/SpriteGenerator';
 import { generateProceduralMap, registerProceduralMap } from '@/lib/ProceduralMap';
+import { t } from '@/lib/i18n';
 import type { Interactable, DifficultyMode } from '@/types';
 
 /** Viewport width excluding the right HUD panel */
@@ -309,7 +310,7 @@ export class ExplorationScene extends Phaser.Scene {
 
     const px = trap.tileX * this.map.tileWidth + this.map.tileWidth / 2;
     const py = trap.tileY * this.map.tileHeight;
-    floatingText(this, px, py - 8, '\u26A1 TRAP! -25 HP', '#ff3366');
+    floatingText(this, px, py - 8, t('explore.trap'), '#ff3366');
 
     // Redraw trap as triggered (visible red X)
     this.trapGraphics.fillStyle(COLORS_HEX.DANGER_RED, 0.4);
@@ -490,7 +491,7 @@ export class ExplorationScene extends Phaser.Scene {
   private handleDoor(interactable: Interactable): void {
     if (!areAllFragmentInteractablesActivated(this.interactables)) {
       const p = getFragmentProgress(this.interactables);
-      floatingText(this, this.hero.x, this.hero.y - 16, `Need ${p.total - p.activated} more`, '#ff8844');
+      floatingText(this, this.hero.x, this.hero.y - 16, t('explore.need_more', { count: p.total - p.activated }), '#ff8844');
       return;
     }
     activateInteractable(interactable.id, this.interactables);
@@ -500,7 +501,7 @@ export class ExplorationScene extends Phaser.Scene {
   }
 
   private checkCompletion(): void {
-    if (areAllFragmentInteractablesActivated(this.interactables)) floatingText(this, this.hero.x, this.hero.y - 24, 'Door Unlocked!', '#ffdd00');
+    if (areAllFragmentInteractablesActivated(this.interactables)) floatingText(this, this.hero.x, this.hero.y - 24, t('explore.door_unlocked'), '#ffdd00');
   }
 
   // ─── Scene Transitions ──────────────────────────────────────────────────

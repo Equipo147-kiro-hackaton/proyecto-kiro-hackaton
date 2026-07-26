@@ -3,39 +3,53 @@ import { validateUsername } from '@/lib/validateUsername';
 import { getOrCreateProfile } from '@/lib/LocalStorageService';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import { COLORS, COLORS_HEX } from '@/lib/Colors';
+import { t, getLocale, toggleLocale, onLocaleChange } from '@/lib/i18n';
 import type { PlayerProfile } from '@/types';
 
 /**
- * LoginScene — Entry point. Username input with cyberpunk terminal aesthetic.
+ * LoginScene — Entry point. Username input + language selector.
  */
 export class LoginScene extends Phaser.Scene {
   private inputElement!: HTMLInputElement;
   private loginButton!: Phaser.GameObjects.Text;
   private errorText!: Phaser.GameObjects.Text;
   private titleText!: Phaser.GameObjects.Text;
+  private subtitleText: Phaser.GameObjects.Text | null = null;
+  private promptText!: Phaser.GameObjects.Text;
+  private footerHintText!: Phaser.GameObjects.Text;
+  private languageToggleBtn!: Phaser.GameObjects.Text;
   private gridGraphics!: Phaser.GameObjects.Graphics;
   private gridOffset = 0;
+  private localeUnsubscribe: (() => void) | null = null;
 
-  constructor() { super('LoginScene'); }
+  constructor() {
+    super('LoginScene');
+  }
 
   create(): void {
     fadeIn(this);
     this.createBackground();
+    this.createLanguageToggle();
     this.createTitle();
     this.createForm();
+
+    this.localeUnsubscribe = onLocaleChange(() => this.refreshTexts());
+
+    this.events.on('shutdown', () => {
+      if (this.localeUnsubscribe) {
+        this.localeUnsubscribe();
+        this.localeUnsubscribe = null;
+      }
+    });
   }
 
   update(): void {
-    // Animate grid scrolling
     this.gridOffset = (this.gridOffset + 0.3) % 40;
     this.drawGrid();
   }
 
   private createBackground(): void {
-    // Dark background
     this.add.rectangle(480, 270, 960, 540, COLORS_HEX.BG_DARK);
-
-    // Animated grid
     this.gridGraphics = this.add.graphics().setAlpha(0.08);
   }
 
@@ -46,27 +60,45 @@ export class LoginScene extends Phaser.Scene {
     const spacing = 40;
     const offset = this.gridOffset;
 
-    // Vertical lines
     for (let x = -spacing + offset; x <= 960 + spacing; x += spacing) {
       this.gridGraphics.lineBetween(x, 0, x, 540);
     }
-    // Horizontal lines
     for (let y = -spacing + offset; y <= 540 + spacing; y += spacing) {
       this.gridGraphics.lineBetween(0, y, 960, y);
     }
   }
 
-  private createTitle(): void {
-    // Main title with typing effect
-    this.titleText = this.add.text(480, 80, '', {
-      fontFamily: 'monospace',
-      fontSize: '28px',
-      color: COLORS.TEXT_WHITE,
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+  private createLanguageToggle(): void {
+    this.languageToggleBtn = this.add
+      .text(920, 24, `\ud83c\udf10 ${getLocale().toUpperCase()}`, {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: COLORS.ACCENT_GOLD,
+        fontStyle: 'bold',
+        backgroundColor: COLORS.BG_PANEL,
+        padding: { x: 8, y: 4 },
+      })
+      .setOrigin(1, 0.5)
+      .setInteractive({ useHandCursor: true });
 
-    // Type out the title character by character
-    const fullTitle = 'Cloud Quest: DevOps Dungeon';
+    this.languageToggleBtn.on('pointerover', () => this.languageToggleBtn.setColor(COLORS.PRIMARY_CYAN));
+    this.languageToggleBtn.on('pointerout', () => this.languageToggleBtn.setColor(COLORS.ACCENT_GOLD));
+    this.languageToggleBtn.on('pointerdown', () => {
+      toggleLocale();
+    });
+  }
+
+  private createTitle(): void {
+    this.titleText = this.add
+      .text(480, 80, '', {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        color: COLORS.TEXT_WHITE,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5);
+
+    const fullTitle = t('login.title');
     let charIndex = 0;
     this.time.addEvent({
       delay: 50,
@@ -77,38 +109,37 @@ export class LoginScene extends Phaser.Scene {
       },
     });
 
-    // Subtitle (appears after title finishes typing)
     this.time.delayedCall(fullTitle.length * 50 + 200, () => {
-      this.add.text(480, 120, 'Defeat production bugs with code!', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: COLORS.PRIMARY_CYAN,
-      }).setOrigin(0.5).setAlpha(0).setName('subtitle');
+      this.subtitleText = this.add
+        .text(480, 120, t('login.subtitle'), {
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: COLORS.PRIMARY_CYAN,
+        })
+        .setOrigin(0.5)
+        .setAlpha(0);
 
-      const subtitle = this.children.getByName('subtitle') as Phaser.GameObjects.Text;
-      if (subtitle) {
-        this.tweens.add({
-          targets: subtitle,
-          alpha: 1,
-          duration: 500,
-          ease: 'Power2',
-        });
-      }
+      this.tweens.add({
+        targets: this.subtitleText,
+        alpha: 1,
+        duration: 500,
+        ease: 'Power2',
+      });
     });
   }
 
   private createForm(): void {
-    // Prompt text
-    this.add.text(480, 180, '> Enter your username to begin', {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: COLORS.TEXT_DIM,
-    }).setOrigin(0.5);
+    this.promptText = this.add
+      .text(480, 180, t('login.prompt'), {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: COLORS.TEXT_DIM,
+      })
+      .setOrigin(0.5);
 
-    // Input element
     this.inputElement = document.createElement('input');
     this.inputElement.type = 'text';
-    this.inputElement.placeholder = 'username_here';
+    this.inputElement.placeholder = t('login.placeholder');
     this.inputElement.maxLength = 20;
     this.inputElement.style.cssText = [
       'padding: 10px 14px',
@@ -140,19 +171,20 @@ export class LoginScene extends Phaser.Scene {
 
     this.add.dom(480, 230, this.inputElement);
 
-    // Login button with pulsing effect
-    this.loginButton = this.add.text(480, 290, '[ LOGIN ]', {
-      fontFamily: 'monospace',
-      fontSize: '18px',
-      color: COLORS.SUCCESS_GREEN,
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.loginButton = this.add
+      .text(480, 290, t('login.button'), {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: COLORS.SUCCESS_GREEN,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     this.loginButton.on('pointerover', () => this.loginButton.setColor('#88ffaa'));
     this.loginButton.on('pointerout', () => this.loginButton.setColor(COLORS.SUCCESS_GREEN));
     this.loginButton.on('pointerdown', () => this.handleSubmit());
 
-    // Subtle pulse animation on login button
     this.tweens.add({
       targets: this.loginButton,
       scaleX: 1.05,
@@ -163,24 +195,37 @@ export class LoginScene extends Phaser.Scene {
       ease: 'Sine.inOut',
     });
 
-    // Error text
-    this.errorText = this.add.text(480, 330, '', {
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      color: COLORS.DANGER_RED,
-      wordWrap: { width: 400 },
-      align: 'center',
-    }).setOrigin(0.5);
+    this.errorText = this.add
+      .text(480, 330, '', {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: COLORS.DANGER_RED,
+        wordWrap: { width: 400 },
+        align: 'center',
+      })
+      .setOrigin(0.5);
 
-    // Keyboard shortcut hint
-    this.add.text(480, 500, 'Enter = Login | 3-20 chars, letters/numbers/underscore', {
-      fontFamily: 'monospace',
-      fontSize: '9px',
-      color: COLORS.TEXT_MUTED,
-    }).setOrigin(0.5);
+    this.footerHintText = this.add
+      .text(480, 500, t('login.footer_hint'), {
+        fontFamily: 'monospace',
+        fontSize: '9px',
+        color: COLORS.TEXT_MUTED,
+      })
+      .setOrigin(0.5);
 
-    // Auto-focus
     this.time.delayedCall(100, () => this.inputElement.focus());
+  }
+
+  private refreshTexts(): void {
+    this.titleText.setText(t('login.title'));
+    if (this.subtitleText) this.subtitleText.setText(t('login.subtitle'));
+    this.promptText.setText(t('login.prompt'));
+    this.loginButton.setText(t('login.button'));
+    this.footerHintText.setText(t('login.footer_hint'));
+    this.languageToggleBtn.setText(`\ud83c\udf10 ${getLocale().toUpperCase()}`);
+    if (this.inputElement) {
+      this.inputElement.placeholder = t('login.placeholder');
+    }
   }
 
   private handleSubmit(): void {
@@ -188,12 +233,12 @@ export class LoginScene extends Phaser.Scene {
     this.errorText.setText('');
 
     if (username.length < 3 || username.length > 20) {
-      this.errorText.setText('Username must be 3-20 characters.');
+      this.errorText.setText(t('login.error_length'));
       this.shakeInput();
       return;
     }
     if (!validateUsername(username)) {
-      this.errorText.setText('Only letters, numbers, and underscores allowed.');
+      this.errorText.setText(t('login.error_chars'));
       this.shakeInput();
       return;
     }
@@ -201,15 +246,16 @@ export class LoginScene extends Phaser.Scene {
     const profile: PlayerProfile = getOrCreateProfile(username);
     this.game.registry.set('playerProfile', profile);
 
-    // Show success and transition
     this.loginButton.setColor(COLORS.PRIMARY_CYAN);
-    this.loginButton.setText('[ WELCOME ]');
+    this.loginButton.setText(t('login.button_welcome'));
 
-    this.add.text(480, 370, `Personal Best: ${profile.personalBest}`, {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: COLORS.ACCENT_GOLD,
-    }).setOrigin(0.5);
+    this.add
+      .text(480, 370, t('login.personal_best', { score: profile.personalBest }), {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: COLORS.ACCENT_GOLD,
+      })
+      .setOrigin(0.5);
 
     this.time.delayedCall(800, () => {
       fadeToScene(this, 'MainMenuScene');
@@ -217,7 +263,6 @@ export class LoginScene extends Phaser.Scene {
   }
 
   private shakeInput(): void {
-    // Shake the error text briefly
     this.tweens.add({
       targets: this.errorText,
       x: this.errorText.x + 4,

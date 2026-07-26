@@ -1,28 +1,58 @@
 import Phaser from 'phaser';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import { COLORS, COLORS_HEX } from '@/lib/Colors';
+import { t, getLocale, toggleLocale, onLocaleChange } from '@/lib/i18n';
 import { getMostRecentSave } from '@/systems/SaveSystem';
 import type { PlayerProfile, DifficultyMode } from '@/types';
 
+const TUTORIAL_DONE_KEY = 'cq-tutorial-done';
+
+type DiffLabelKey = 'menu.difficulty.beginner' | 'menu.difficulty.normal' | 'menu.difficulty.hard';
+type DiffDescKey =
+  | 'menu.difficulty.beginner_desc'
+  | 'menu.difficulty.normal_desc'
+  | 'menu.difficulty.hard_desc';
+
 /**
- * MainMenuScene — Difficulty selection and run start with cyberpunk aesthetic.
+ * MainMenuScene — Difficulty selection, run start, tutorial routing.
  */
 export class MainMenuScene extends Phaser.Scene {
   private selectedMode: DifficultyMode = 'normal';
   private modeButtons: Phaser.GameObjects.Text[] = [];
+  private modeDescriptions: Phaser.GameObjects.Text[] = [];
+  private titleText!: Phaser.GameObjects.Text;
+  private welcomeText!: Phaser.GameObjects.Text;
+  private selectDifficultyText!: Phaser.GameObjects.Text;
+  private newRunBtn!: Phaser.GameObjects.Text;
+  private continueBtn: Phaser.GameObjects.Text | null = null;
+  private leaderboardBtn!: Phaser.GameObjects.Text;
+  private footerHintText!: Phaser.GameObjects.Text;
+  private languageToggleBtn!: Phaser.GameObjects.Text;
   private gridGraphics!: Phaser.GameObjects.Graphics;
   private gridOffset = 0;
+  private localeUnsubscribe: (() => void) | null = null;
 
-  constructor() { super('MainMenuScene'); }
+  constructor() {
+    super('MainMenuScene');
+  }
 
   create(): void {
     fadeIn(this);
     this.createBackground();
+    this.createLanguageToggle();
     this.createHeader();
     this.createDifficultySelection();
     this.createActions();
     this.createFooter();
     this.setupKeyboard();
+
+    this.localeUnsubscribe = onLocaleChange(() => this.refreshTexts());
+    this.events.on('shutdown', () => {
+      if (this.localeUnsubscribe) {
+        this.localeUnsubscribe();
+        this.localeUnsubscribe = null;
+      }
+    });
   }
 
   update(): void {
@@ -38,7 +68,6 @@ export class MainMenuScene extends Phaser.Scene {
   private drawGrid(): void {
     this.gridGraphics.clear();
     this.gridGraphics.lineStyle(1, COLORS_HEX.PRIMARY_BLUE);
-
     const spacing = 40;
     const offset = this.gridOffset;
 
@@ -50,97 +79,148 @@ export class MainMenuScene extends Phaser.Scene {
     }
   }
 
+  private createLanguageToggle(): void {
+    this.languageToggleBtn = this.add
+      .text(920, 24, `\ud83c\udf10 ${getLocale().toUpperCase()}`, {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: COLORS.ACCENT_GOLD,
+        fontStyle: 'bold',
+        backgroundColor: COLORS.BG_PANEL,
+        padding: { x: 8, y: 4 },
+      })
+      .setOrigin(1, 0.5)
+      .setInteractive({ useHandCursor: true });
+
+    this.languageToggleBtn.on('pointerover', () =>
+      this.languageToggleBtn.setColor(COLORS.PRIMARY_CYAN),
+    );
+    this.languageToggleBtn.on('pointerout', () =>
+      this.languageToggleBtn.setColor(COLORS.ACCENT_GOLD),
+    );
+    this.languageToggleBtn.on('pointerdown', () => toggleLocale());
+  }
+
   private createHeader(): void {
     const profile = this.game.registry.get('playerProfile') as PlayerProfile | undefined;
     const username = profile?.username ?? 'Player';
     const personalBest = profile?.personalBest ?? 0;
 
-    this.add.text(480, 50, 'Cloud Quest: DevOps Dungeon', {
-      fontFamily: 'monospace',
-      fontSize: '22px',
-      color: COLORS.TEXT_WHITE,
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+    this.titleText = this.add
+      .text(480, 50, t('menu.title'), {
+        fontFamily: 'monospace',
+        fontSize: '22px',
+        color: COLORS.TEXT_WHITE,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5);
 
-    this.add.text(480, 82, `Welcome, ${username}!  |  Best: ${personalBest}`, {
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      color: COLORS.ACCENT_GOLD,
-    }).setOrigin(0.5);
+    this.welcomeText = this.add
+      .text(480, 82, t('menu.welcome', { username, best: personalBest }), {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: COLORS.ACCENT_GOLD,
+      })
+      .setOrigin(0.5);
 
-    // Separator line
     const sep = this.add.graphics();
     sep.lineStyle(1, COLORS_HEX.PRIMARY_BLUE, 0.3);
     sep.lineBetween(200, 100, 760, 100);
   }
 
   private createDifficultySelection(): void {
-    this.add.text(480, 120, 'SELECT DIFFICULTY', {
-      fontFamily: 'monospace',
-      fontSize: '11px',
-      color: COLORS.TEXT_DIM,
-    }).setOrigin(0.5);
+    this.selectDifficultyText = this.add
+      .text(480, 120, t('menu.select_difficulty'), {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        color: COLORS.TEXT_DIM,
+      })
+      .setOrigin(0.5);
 
-    const modes: Array<{ mode: DifficultyMode; label: string; desc: string; color: string }> = [
-      { mode: 'beginner', label: 'BEGINNER', desc: 'Auto-save, full hints, guides', color: COLORS.DIFFICULTY_BEGINNER },
-      { mode: 'normal', label: 'NORMAL', desc: 'Manual saves at 30%/60%, hints after fail', color: COLORS.DIFFICULTY_NORMAL },
-      { mode: 'hard', label: 'HARD', desc: 'No saves, no hints, no mercy', color: COLORS.DIFFICULTY_HARD },
+    const modes: Array<{
+      mode: DifficultyMode;
+      labelKey: DiffLabelKey;
+      descKey: DiffDescKey;
+      color: string;
+    }> = [
+      {
+        mode: 'beginner',
+        labelKey: 'menu.difficulty.beginner',
+        descKey: 'menu.difficulty.beginner_desc',
+        color: COLORS.DIFFICULTY_BEGINNER,
+      },
+      {
+        mode: 'normal',
+        labelKey: 'menu.difficulty.normal',
+        descKey: 'menu.difficulty.normal_desc',
+        color: COLORS.DIFFICULTY_NORMAL,
+      },
+      {
+        mode: 'hard',
+        labelKey: 'menu.difficulty.hard',
+        descKey: 'menu.difficulty.hard_desc',
+        color: COLORS.DIFFICULTY_HARD,
+      },
     ];
 
     this.modeButtons = [];
+    this.modeDescriptions = [];
     modes.forEach((m, idx) => {
       const y = 160 + idx * 48;
 
-      const btn = this.add.text(480, y, `[ ${m.label} ]`, {
-        fontFamily: 'monospace',
-        fontSize: '16px',
-        color: m.color,
-        fontStyle: 'bold',
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      const btn = this.add
+        .text(480, y, `[ ${t(m.labelKey)} ]`, {
+          fontFamily: 'monospace',
+          fontSize: '16px',
+          color: m.color,
+          fontStyle: 'bold',
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
 
-      this.add.text(480, y + 18, m.desc, {
-        fontFamily: 'monospace',
-        fontSize: '9px',
-        color: COLORS.TEXT_MUTED,
-      }).setOrigin(0.5);
+      const desc = this.add
+        .text(480, y + 18, t(m.descKey), {
+          fontFamily: 'monospace',
+          fontSize: '9px',
+          color: COLORS.TEXT_MUTED,
+        })
+        .setOrigin(0.5);
 
+      btn.setData('labelKey', m.labelKey);
+      desc.setData('descKey', m.descKey);
       btn.on('pointerdown', () => {
         this.selectedMode = m.mode;
         this.updateModeSelection();
       });
-
       btn.on('pointerover', () => {
-        if (this.selectedMode !== m.mode) {
-          btn.setAlpha(0.8);
-        }
+        if (this.selectedMode !== m.mode) btn.setAlpha(0.8);
       });
-
-      btn.on('pointerout', () => {
-        this.updateModeSelection();
-      });
+      btn.on('pointerout', () => this.updateModeSelection());
 
       this.modeButtons.push(btn);
+      this.modeDescriptions.push(desc);
     });
 
     this.updateModeSelection();
   }
 
   private createActions(): void {
-    // New Run button
-    const newRunBtn = this.add.text(480, 325, '[ NEW RUN ]', {
-      fontFamily: 'monospace',
-      fontSize: '18px',
-      color: COLORS.SUCCESS_GREEN,
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.newRunBtn = this.add
+      .text(480, 325, t('menu.new_run'), {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: COLORS.SUCCESS_GREEN,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
-    newRunBtn.on('pointerover', () => newRunBtn.setColor('#88ffaa'));
-    newRunBtn.on('pointerout', () => newRunBtn.setColor(COLORS.SUCCESS_GREEN));
-    newRunBtn.on('pointerdown', () => this.startNewRun());
+    this.newRunBtn.on('pointerover', () => this.newRunBtn.setColor('#88ffaa'));
+    this.newRunBtn.on('pointerout', () => this.newRunBtn.setColor(COLORS.SUCCESS_GREEN));
+    this.newRunBtn.on('pointerdown', () => this.startNewRun());
 
-    // Pulse on New Run
     this.tweens.add({
-      targets: newRunBtn,
+      targets: this.newRunBtn,
       scaleX: 1.03,
       scaleY: 1.03,
       duration: 1000,
@@ -149,45 +229,60 @@ export class MainMenuScene extends Phaser.Scene {
       ease: 'Sine.inOut',
     });
 
-    // Continue button (if saves exist)
     if (getMostRecentSave('beginner') || getMostRecentSave('normal')) {
-      const contBtn = this.add.text(480, 365, '[ CONTINUE ]', {
-        fontFamily: 'monospace',
-        fontSize: '14px',
-        color: COLORS.PRIMARY_CYAN,
-        fontStyle: 'bold',
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      this.continueBtn = this.add
+        .text(480, 365, t('menu.continue'), {
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          color: COLORS.PRIMARY_CYAN,
+          fontStyle: 'bold',
+        })
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: true });
 
-      contBtn.on('pointerover', () => contBtn.setColor('#88ddff'));
-      contBtn.on('pointerout', () => contBtn.setColor(COLORS.PRIMARY_CYAN));
-      contBtn.on('pointerdown', () => this.continueSave());
+      this.continueBtn.on('pointerover', () => this.continueBtn?.setColor('#88ddff'));
+      this.continueBtn.on('pointerout', () => this.continueBtn?.setColor(COLORS.PRIMARY_CYAN));
+      this.continueBtn.on('pointerdown', () => this.continueSave());
     }
 
-    // Leaderboard button
-    const lbBtn = this.add.text(480, 410, '[ LEADERBOARD ]', {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: COLORS.PRIMARY_BLUE,
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.leaderboardBtn = this.add
+      .text(480, 410, t('menu.leaderboard'), {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        color: COLORS.PRIMARY_BLUE,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
-    lbBtn.on('pointerover', () => lbBtn.setColor('#6699ff'));
-    lbBtn.on('pointerout', () => lbBtn.setColor(COLORS.PRIMARY_BLUE));
-    lbBtn.on('pointerdown', () => fadeToScene(this, 'LeaderboardScene'));
+    this.leaderboardBtn.on('pointerover', () => this.leaderboardBtn.setColor('#6699ff'));
+    this.leaderboardBtn.on('pointerout', () => this.leaderboardBtn.setColor(COLORS.PRIMARY_BLUE));
+    this.leaderboardBtn.on('pointerdown', () => fadeToScene(this, 'LeaderboardScene'));
   }
 
   private createFooter(): void {
-    this.add.text(480, 500, '1=Beginner  2=Normal  3=Hard  |  Enter=Start  |  L=Leaderboard', {
-      fontFamily: 'monospace',
-      fontSize: '9px',
-      color: COLORS.TEXT_MUTED,
-    }).setOrigin(0.5);
+    this.footerHintText = this.add
+      .text(480, 500, t('menu.footer_hint'), {
+        fontFamily: 'monospace',
+        fontSize: '9px',
+        color: COLORS.TEXT_MUTED,
+      })
+      .setOrigin(0.5);
   }
 
   private setupKeyboard(): void {
-    this.input.keyboard?.on('keydown-ONE', () => { this.selectedMode = 'beginner'; this.updateModeSelection(); });
-    this.input.keyboard?.on('keydown-TWO', () => { this.selectedMode = 'normal'; this.updateModeSelection(); });
-    this.input.keyboard?.on('keydown-THREE', () => { this.selectedMode = 'hard'; this.updateModeSelection(); });
+    this.input.keyboard?.on('keydown-ONE', () => {
+      this.selectedMode = 'beginner';
+      this.updateModeSelection();
+    });
+    this.input.keyboard?.on('keydown-TWO', () => {
+      this.selectedMode = 'normal';
+      this.updateModeSelection();
+    });
+    this.input.keyboard?.on('keydown-THREE', () => {
+      this.selectedMode = 'hard';
+      this.updateModeSelection();
+    });
     this.input.keyboard?.on('keydown-ENTER', () => this.startNewRun());
     this.input.keyboard?.on('keydown-L', () => fadeToScene(this, 'LeaderboardScene'));
   }
@@ -205,17 +300,51 @@ export class MainMenuScene extends Phaser.Scene {
     });
   }
 
-  private startNewRun(): void {
-    fadeToScene(this, 'ExplorationScene', {
-      level: 1,
-      difficulty: this.selectedMode,
-      hp: 100,
-      score: 0,
+  private refreshTexts(): void {
+    this.titleText.setText(t('menu.title'));
+    const profile = this.game.registry.get('playerProfile') as PlayerProfile | undefined;
+    const username = profile?.username ?? 'Player';
+    const personalBest = profile?.personalBest ?? 0;
+    this.welcomeText.setText(t('menu.welcome', { username, best: personalBest }));
+    this.selectDifficultyText.setText(t('menu.select_difficulty'));
+
+    this.modeButtons.forEach((btn) => {
+      const labelKey = btn.getData('labelKey') as DiffLabelKey;
+      btn.setText(`[ ${t(labelKey)} ]`);
     });
+    this.modeDescriptions.forEach((desc) => {
+      const descKey = desc.getData('descKey') as DiffDescKey;
+      desc.setText(t(descKey));
+    });
+
+    this.newRunBtn.setText(t('menu.new_run'));
+    if (this.continueBtn) this.continueBtn.setText(t('menu.continue'));
+    this.leaderboardBtn.setText(t('menu.leaderboard'));
+    this.footerHintText.setText(t('menu.footer_hint'));
+    this.languageToggleBtn.setText(`\ud83c\udf10 ${getLocale().toUpperCase()}`);
+  }
+
+  private startNewRun(): void {
+    const tutorialDone = localStorage.getItem(TUTORIAL_DONE_KEY) === 'true';
+    if (!tutorialDone) {
+      fadeToScene(this, 'TutorialScene', {
+        pendingDifficulty: this.selectedMode,
+      });
+    } else {
+      fadeToScene(this, 'ExplorationScene', {
+        level: 1,
+        difficulty: this.selectedMode,
+        hp: 100,
+        score: 0,
+      });
+    }
   }
 
   private continueSave(): void {
-    const save = getMostRecentSave(this.selectedMode) ?? getMostRecentSave('beginner') ?? getMostRecentSave('normal');
+    const save =
+      getMostRecentSave(this.selectedMode) ??
+      getMostRecentSave('beginner') ??
+      getMostRecentSave('normal');
     if (save) {
       fadeToScene(this, 'ExplorationScene', {
         level: save.data.currentLevel,

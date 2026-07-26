@@ -1,142 +1,162 @@
 import Phaser from 'phaser';
+import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
+import { COLORS, COLORS_HEX } from '@/lib/Colors';
+import { t, onLocaleChange } from '@/lib/i18n';
+import type { DifficultyMode } from '@/types';
+import type { TranslationKey } from '@/data/translations';
 
-interface TutorialStep {
-  title: string;
-  lines: string[];
-}
+const TUTORIAL_DONE_KEY = 'cq-tutorial-done';
 
-const TUTORIAL_STEPS: TutorialStep[] = [
-  {
-    title: 'Room Navigation',
-    lines: [
-      'Use WASD or Arrow keys to move between rooms in the dungeon.',
-      'Each level has combat rooms (where bugs await) and rest rooms (where you heal).',
-    ],
-  },
-  {
-    title: 'Puzzle Combat',
-    lines: [
-      'When you enter a combat room, a programming puzzle appears.',
-      'Type your answer and press Enter to attack the bug.',
-      'Correct answers deal damage based on remaining time. Wrong answers cost you 10 HP.',
-    ],
-  },
-  {
-    title: 'Timer Mechanics',
-    lines: [
-      'You have 60 seconds (90 for boss bugs) to solve each puzzle.',
-      'Solving faster = more damage! If timer hits 0, you take 15 HP damage.',
-      'Watch the timer turn red when 10 seconds remain!',
-    ],
-  },
-  {
-    title: 'Items & Strategy',
-    lines: [
-      'After defeating bugs, choose from 2 items to help you.',
-      'You can hold up to 3 active items. Use them wisely!',
-      'Items include: Timer Extension, HP Recovery, Score Multiplier, and more.',
-    ],
-  },
-  {
-    title: 'Ready to Go!',
-    lines: [
-      'Your goal: survive as many levels as possible and get the highest score!',
-      'Good luck, hero! Press Enter to begin your first run.',
-    ],
-  },
+const TUTORIAL_STEP_KEYS: TranslationKey[] = [
+  'tutorial.step_1',
+  'tutorial.step_2',
+  'tutorial.step_3',
+  'tutorial.step_4',
+  'tutorial.step_5',
+  'tutorial.step_6',
 ];
 
+interface TutorialSceneData {
+  pendingDifficulty?: DifficultyMode;
+}
+
+/**
+ * TutorialScene — First-run onboarding.
+ * Called from MainMenuScene when localStorage.cq-tutorial-done is not set.
+ */
 export class TutorialScene extends Phaser.Scene {
   private currentStep = 0;
+  private pendingDifficulty: DifficultyMode = 'beginner';
+
   private titleText!: Phaser.GameObjects.Text;
-  private descriptionText!: Phaser.GameObjects.Text;
-  private buttonText!: Phaser.GameObjects.Text;
-  private stepIndicator!: Phaser.GameObjects.Text;
+  private stepText!: Phaser.GameObjects.Text;
+  private nextButton!: Phaser.GameObjects.Text;
+  private skipButton!: Phaser.GameObjects.Text;
+  private progressText!: Phaser.GameObjects.Text;
+  private localeUnsubscribe: (() => void) | null = null;
 
   constructor() {
     super('TutorialScene');
   }
 
-  create(): void {
+  init(data: TutorialSceneData): void {
     this.currentStep = 0;
+    this.pendingDifficulty = data.pendingDifficulty ?? 'beginner';
+  }
 
-    // Title text (step title)
-    this.titleText = this.add.text(480, 120, '', {
-      fontFamily: 'monospace',
-      fontSize: '20px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
+  create(): void {
+    fadeIn(this);
 
-    // Description text (step content)
-    this.descriptionText = this.add.text(480, 270, '', {
-      fontFamily: 'monospace',
-      fontSize: '16px',
-      color: '#ffffff',
-      align: 'center',
-      wordWrap: { width: 700 },
-      lineSpacing: 10,
-    }).setOrigin(0.5);
+    this.add.rectangle(480, 270, 960, 540, COLORS_HEX.BG_DARK);
 
-    // Navigation button
-    this.buttonText = this.add.text(480, 440, '', {
-      fontFamily: 'monospace',
-      fontSize: '18px',
-      color: '#44ff44',
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.titleText = this.add
+      .text(480, 60, t('tutorial.title'), {
+        fontFamily: 'monospace',
+        fontSize: '28px',
+        color: COLORS.PRIMARY_CYAN,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5);
 
-    this.buttonText.on('pointerover', () => {
-      this.buttonText.setColor('#88ff88');
-    });
+    const sep = this.add.graphics();
+    sep.lineStyle(1, COLORS_HEX.PRIMARY_BLUE, 0.4);
+    sep.lineBetween(200, 95, 760, 95);
 
-    this.buttonText.on('pointerout', () => {
-      this.buttonText.setColor('#44ff44');
-    });
+    this.stepText = this.add
+      .text(480, 250, '', {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: COLORS.TEXT_WHITE,
+        align: 'center',
+        wordWrap: { width: 720 },
+        lineSpacing: 8,
+      })
+      .setOrigin(0.5);
 
-    this.buttonText.on('pointerdown', () => {
-      this.advance();
-    });
+    this.nextButton = this.add
+      .text(480, 420, t('tutorial.next'), {
+        fontFamily: 'monospace',
+        fontSize: '18px',
+        color: COLORS.SUCCESS_GREEN,
+        fontStyle: 'bold',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
-    // Step indicator
-    this.stepIndicator = this.add.text(480, 490, '', {
-      fontFamily: 'monospace',
-      fontSize: '14px',
-      color: '#888888',
-    }).setOrigin(0.5);
+    this.nextButton.on('pointerover', () => this.nextButton.setColor('#88ff88'));
+    this.nextButton.on('pointerout', () => this.nextButton.setColor(COLORS.SUCCESS_GREEN));
+    this.nextButton.on('pointerdown', () => this.advance());
 
-    // Keyboard support: Enter or Space advances
-    this.input.keyboard?.on('keydown-ENTER', () => {
-      this.advance();
-    });
-    this.input.keyboard?.on('keydown-SPACE', () => {
-      this.advance();
-    });
+    this.skipButton = this.add
+      .text(480, 465, t('tutorial.skip'), {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: COLORS.TEXT_DIM,
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
+
+    this.skipButton.on('pointerover', () => this.skipButton.setColor(COLORS.TEXT_WHITE));
+    this.skipButton.on('pointerout', () => this.skipButton.setColor(COLORS.TEXT_DIM));
+    this.skipButton.on('pointerdown', () => this.skipTutorial());
+
+    this.progressText = this.add
+      .text(480, 500, '', {
+        fontFamily: 'monospace',
+        fontSize: '11px',
+        color: COLORS.TEXT_MUTED,
+      })
+      .setOrigin(0.5);
+
+    this.input.keyboard?.on('keydown-ENTER', () => this.advance());
+    this.input.keyboard?.on('keydown-SPACE', () => this.advance());
+    this.input.keyboard?.on('keydown-ESC', () => this.skipTutorial());
 
     this.renderStep();
+
+    this.localeUnsubscribe = onLocaleChange(() => this.renderStep());
+    this.events.on('shutdown', () => {
+      if (this.localeUnsubscribe) {
+        this.localeUnsubscribe();
+        this.localeUnsubscribe = null;
+      }
+    });
   }
 
   private renderStep(): void {
-    const step = TUTORIAL_STEPS[this.currentStep];
-    const isLastStep = this.currentStep === TUTORIAL_STEPS.length - 1;
+    const isLastStep = this.currentStep === TUTORIAL_STEP_KEYS.length - 1;
+    const stepKey = TUTORIAL_STEP_KEYS[this.currentStep];
 
-    this.titleText.setText(step.title);
-    this.descriptionText.setText(step.lines.join('\n'));
-    this.buttonText.setText(isLastStep ? '[ START! ]' : '[ NEXT \u2192 ]');
-    this.stepIndicator.setText(`Step ${this.currentStep + 1}/${TUTORIAL_STEPS.length}`);
+    this.titleText.setText(t('tutorial.title'));
+    this.stepText.setText(t(stepKey));
+    this.nextButton.setText(isLastStep ? t('tutorial.start') : t('tutorial.next'));
+    this.skipButton.setText(t('tutorial.skip'));
+    this.progressText.setText(`${this.currentStep + 1} / ${TUTORIAL_STEP_KEYS.length}`);
   }
 
   private advance(): void {
-    if (this.currentStep < TUTORIAL_STEPS.length - 1) {
+    if (this.currentStep < TUTORIAL_STEP_KEYS.length - 1) {
       this.currentStep++;
       this.renderStep();
     } else {
-      this.onComplete();
+      this.completeAndStart();
     }
   }
 
-  private onComplete(): void {
+  private skipTutorial(): void {
+    localStorage.setItem(TUTORIAL_DONE_KEY, 'true');
     this.game.registry.set('tutorialDone', true);
-    this.scene.start('ExplorationScene', { level: 1, difficulty: 'beginner', hp: 100, score: 0 });
+    fadeToScene(this, 'MainMenuScene');
+  }
+
+  private completeAndStart(): void {
+    localStorage.setItem(TUTORIAL_DONE_KEY, 'true');
+    this.game.registry.set('tutorialDone', true);
+    fadeToScene(this, 'ExplorationScene', {
+      level: 1,
+      difficulty: this.pendingDifficulty,
+      hp: 100,
+      score: 0,
+    });
   }
 }

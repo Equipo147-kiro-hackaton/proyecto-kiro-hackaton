@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ScoreSystem } from '@/systems/ScoreSystem';
 import { submitScore as submitScoreLocal, updatePersonalBest } from '@/lib/LocalStorageService';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
+import { t } from '@/lib/i18n';
 import type { GameOverData, RunResult } from '@/types';
 
 /**
@@ -37,7 +38,7 @@ export class GameOverScene extends Phaser.Scene {
    */
   private displayResults(): void {
     // Title
-    this.add.text(480, 80, 'GAME OVER', {
+    this.add.text(480, 80, t('gameover.title'), {
       fontSize: '40px',
       fontFamily: 'monospace',
       color: '#ff4444',
@@ -45,7 +46,7 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Final Score
-    this.add.text(480, 170, `Final Score: ${this.gameOverData.score}`, {
+    this.add.text(480, 170, t('gameover.final_score', { score: this.gameOverData.score }), {
       fontSize: '24px',
       fontFamily: 'monospace',
       color: '#ffffff',
@@ -53,21 +54,21 @@ export class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Level Reached
-    this.add.text(480, 220, `Level Reached: ${this.gameOverData.levelReached}`, {
+    this.add.text(480, 220, t('gameover.level_reached', { level: this.gameOverData.levelReached }), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Bugs Defeated
-    this.add.text(480, 260, `Bugs Defeated: ${this.gameOverData.bugsDefeated}`, {
+    this.add.text(480, 260, t('gameover.bugs_defeated', { count: this.gameOverData.bugsDefeated }), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Puzzles Solved
-    this.add.text(480, 300, `Puzzles Solved: ${this.gameOverData.puzzlesSolved}`, {
+    this.add.text(480, 300, t('gameover.puzzles_solved', { count: this.gameOverData.puzzlesSolved }), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
@@ -79,7 +80,7 @@ export class GameOverScene extends Phaser.Scene {
    */
   private createButtons(): void {
     // New Run button
-    const newRunBtn = this.add.text(480, 390, '[ NEW RUN ]', {
+    const newRunBtn = this.add.text(480, 390, t('gameover.new_run'), {
       fontSize: '22px',
       fontFamily: 'monospace',
       color: '#44ff44',
@@ -91,7 +92,7 @@ export class GameOverScene extends Phaser.Scene {
     newRunBtn.on('pointerdown', () => this.startNewRun());
 
     // View Leaderboard button
-    const leaderboardBtn = this.add.text(480, 450, '[ VIEW LEADERBOARD ]', {
+    const leaderboardBtn = this.add.text(480, 450, t('gameover.view_leaderboard'), {
       fontSize: '22px',
       fontFamily: 'monospace',
       color: '#66ccff',
@@ -105,7 +106,6 @@ export class GameOverScene extends Phaser.Scene {
 
   /**
    * Start a new run: return to MainMenu for difficulty selection.
-   * Requirement: 8.5
    */
   private startNewRun(): void {
     fadeToScene(this, 'MainMenuScene');
@@ -113,7 +113,6 @@ export class GameOverScene extends Phaser.Scene {
 
   /**
    * Navigate to LeaderboardScene.
-   * Requirement: 8.6
    */
   private viewLeaderboard(): void {
     fadeToScene(this, 'LeaderboardScene');
@@ -121,7 +120,6 @@ export class GameOverScene extends Phaser.Scene {
 
   /**
    * Submit the run score to the backend via ScoreSystem and save locally.
-   * Requirement: 8.3
    */
   private submitScoreToBackend(): void {
     const username = this.game.registry.get('playerProfile')?.username ?? 'anonymous';

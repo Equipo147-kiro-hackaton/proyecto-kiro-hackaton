@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ScoreSystem } from '@/systems/ScoreSystem';
 import { submitScore as submitScoreLocal, updatePersonalBest } from '@/lib/LocalStorageService';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
+import { t } from '@/lib/i18n';
 import type { VictoryData, RunResult } from '@/types';
 
 /**
@@ -35,11 +36,10 @@ export class VictoryScene extends Phaser.Scene {
   /**
    * Display the victory results: title, score, bugs defeated, puzzles solved,
    * and congratulatory message.
-   * Requirements: 8.2, 8.4
    */
   private displayResults(): void {
     // Title in gold
-    this.add.text(480, 70, 'DUNGEON CLEARED!', {
+    this.add.text(480, 70, t('victory.title'), {
       fontSize: '36px',
       fontFamily: 'monospace',
       color: '#ffcc00',
@@ -47,14 +47,14 @@ export class VictoryScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Congratulatory message
-    this.add.text(480, 130, 'You vanquished all the production bugs!', {
+    this.add.text(480, 130, t('victory.message'), {
       fontSize: '16px',
       fontFamily: 'monospace',
       color: '#ffffff',
     }).setOrigin(0.5);
 
     // Final Score
-    this.add.text(480, 200, `Final Score: ${this.victoryData.score}`, {
+    this.add.text(480, 200, t('victory.final_score', { score: this.victoryData.score }), {
       fontSize: '24px',
       fontFamily: 'monospace',
       color: '#ffffff',
@@ -62,14 +62,14 @@ export class VictoryScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Bugs Defeated
-    this.add.text(480, 250, `Bugs Defeated: ${this.victoryData.bugsDefeated}`, {
+    this.add.text(480, 250, t('victory.bugs_defeated', { count: this.victoryData.bugsDefeated }), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
     }).setOrigin(0.5);
 
     // Puzzles Solved
-    this.add.text(480, 290, `Puzzles Solved: ${this.victoryData.puzzlesSolved}`, {
+    this.add.text(480, 290, t('victory.puzzles_solved', { count: this.victoryData.puzzlesSolved }), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#cccccc',
@@ -78,11 +78,10 @@ export class VictoryScene extends Phaser.Scene {
 
   /**
    * Create "New Run" and "View Leaderboard" buttons.
-   * Requirement: 8.4
    */
   private createButtons(): void {
     // New Run button
-    const newRunBtn = this.add.text(480, 380, '[ NEW RUN ]', {
+    const newRunBtn = this.add.text(480, 380, t('victory.new_run'), {
       fontSize: '22px',
       fontFamily: 'monospace',
       color: '#44ff44',
@@ -94,7 +93,7 @@ export class VictoryScene extends Phaser.Scene {
     newRunBtn.on('pointerdown', () => this.startNewRun());
 
     // View Leaderboard button
-    const leaderboardBtn = this.add.text(480, 440, '[ VIEW LEADERBOARD ]', {
+    const leaderboardBtn = this.add.text(480, 440, t('victory.view_leaderboard'), {
       fontSize: '22px',
       fontFamily: 'monospace',
       color: '#66ccff',
@@ -108,7 +107,6 @@ export class VictoryScene extends Phaser.Scene {
 
   /**
    * Start a new run: return to MainMenu for difficulty selection.
-   * Requirement: 8.5
    */
   private startNewRun(): void {
     fadeToScene(this, 'MainMenuScene');
@@ -116,7 +114,6 @@ export class VictoryScene extends Phaser.Scene {
 
   /**
    * Navigate to LeaderboardScene.
-   * Requirement: 8.6
    */
   private viewLeaderboard(): void {
     fadeToScene(this, 'LeaderboardScene');
@@ -124,7 +121,6 @@ export class VictoryScene extends Phaser.Scene {
 
   /**
    * Submit the run score to the backend via ScoreSystem and save locally.
-   * Requirement: 5.3
    */
   private submitScoreToBackend(): void {
     const username = this.game.registry.get('playerProfile')?.username ?? 'anonymous';

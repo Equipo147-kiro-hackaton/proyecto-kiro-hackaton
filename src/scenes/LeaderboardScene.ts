@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getLeaderboard } from '@/lib/ApiClient';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
+import { t } from '@/lib/i18n';
 import type { LeaderboardEntry } from '@/types';
 
 /**
@@ -23,7 +24,7 @@ export class LeaderboardScene extends Phaser.Scene {
     fadeIn(this);
 
     // Title
-    this.add.text(480, 40, 'LEADERBOARD', {
+    this.add.text(480, 40, t('leaderboard.title'), {
       fontSize: '32px',
       fontFamily: 'monospace',
       color: '#ffcc00',
@@ -31,14 +32,14 @@ export class LeaderboardScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Loading indicator
-    this.loadingText = this.add.text(480, 270, 'Loading...', {
+    this.loadingText = this.add.text(480, 270, t('leaderboard.loading'), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#aaaaaa',
     }).setOrigin(0.5);
 
     // Back button
-    const backBtn = this.add.text(480, 500, '[ BACK ]', {
+    const backBtn = this.add.text(480, 500, t('leaderboard.back'), {
       fontSize: '20px',
       fontFamily: 'monospace',
       color: '#66ccff',
@@ -55,7 +56,6 @@ export class LeaderboardScene extends Phaser.Scene {
   /**
    * Fetch leaderboard data within 3 seconds via ApiClient.
    * On success, render entries. On failure, show error with Retry button.
-   * Requirement: 5.5
    */
   private async loadLeaderboard(): Promise<void> {
     try {
@@ -78,13 +78,13 @@ export class LeaderboardScene extends Phaser.Scene {
   private showEmptyState(): void {
     this.contentContainer.removeAll(true);
 
-    const emptyText = this.add.text(480, 220, 'No scores yet!', {
+    const emptyText = this.add.text(480, 220, t('leaderboard.empty_title'), {
       fontSize: '20px',
       fontFamily: 'monospace',
       color: '#ffcc00',
     }).setOrigin(0.5);
 
-    const hintText = this.add.text(480, 260, 'Play a run to be the first on the leaderboard.', {
+    const hintText = this.add.text(480, 260, t('leaderboard.empty_message'), {
       fontSize: '14px',
       fontFamily: 'monospace',
       color: '#888888',
@@ -95,15 +95,10 @@ export class LeaderboardScene extends Phaser.Scene {
 
   /**
    * Render leaderboard entries sorted highest to lowest.
-   * Username truncated to 20 chars, score as numeric, date as YYYY-MM-DD.
-   * If < 10 records, show only available records (no empty rows).
-   * Requirements: 5.5, 5.6, 5.7
    */
   private renderEntries(entries: LeaderboardEntry[]): void {
-    // Clear previous content
     this.contentContainer.removeAll(true);
 
-    // Sort highest to lowest
     const sorted = [...entries].sort((a, b) => b.score - a.score);
 
     const startY = 90;
@@ -121,10 +116,10 @@ export class LeaderboardScene extends Phaser.Scene {
       fontStyle: 'bold',
     };
 
-    this.contentContainer.add(this.add.text(colRank, startY, '#', headerStyle));
-    this.contentContainer.add(this.add.text(colUsername, startY, 'Username', headerStyle));
-    this.contentContainer.add(this.add.text(colScore, startY, 'Score', headerStyle));
-    this.contentContainer.add(this.add.text(colDate, startY, 'Date', headerStyle));
+    this.contentContainer.add(this.add.text(colRank, startY, t('leaderboard.col_rank'), headerStyle));
+    this.contentContainer.add(this.add.text(colUsername, startY, t('leaderboard.col_username'), headerStyle));
+    this.contentContainer.add(this.add.text(colScore, startY, t('leaderboard.col_score'), headerStyle));
+    this.contentContainer.add(this.add.text(colDate, startY, t('leaderboard.col_date'), headerStyle));
 
     // Separator line
     const separatorY = startY + 24;
@@ -133,13 +128,12 @@ export class LeaderboardScene extends Phaser.Scene {
     separator.lineBetween(100, separatorY, 860, separatorY);
     this.contentContainer.add(separator);
 
-    // Entries — only render available records, no empty placeholder rows
+    // Entries
     sorted.forEach((entry, index) => {
       const y = separatorY + 16 + index * rowHeight;
       const isEven = index % 2 === 0;
       const textColor = isEven ? '#ffffff' : '#dddddd';
 
-      // Alternating row background
       if (!isEven) {
         const bg = this.add.graphics();
         bg.fillStyle(0x222233, 0.5);
@@ -153,29 +147,17 @@ export class LeaderboardScene extends Phaser.Scene {
         color: textColor,
       };
 
-      // Rank
-      this.contentContainer.add(
-        this.add.text(colRank, y, `${index + 1}`, rowStyle)
-      );
+      this.contentContainer.add(this.add.text(colRank, y, `${index + 1}`, rowStyle));
 
-      // Username — truncated to 20 chars
       const displayUsername = entry.username.length > 20
         ? entry.username.substring(0, 20)
         : entry.username;
-      this.contentContainer.add(
-        this.add.text(colUsername, y, displayUsername, rowStyle)
-      );
+      this.contentContainer.add(this.add.text(colUsername, y, displayUsername, rowStyle));
 
-      // Score — numeric
-      this.contentContainer.add(
-        this.add.text(colScore, y, `${entry.score}`, rowStyle)
-      );
+      this.contentContainer.add(this.add.text(colScore, y, `${entry.score}`, rowStyle));
 
-      // Date — YYYY-MM-DD format
       const displayDate = this.formatDate(entry.runDate);
-      this.contentContainer.add(
-        this.add.text(colDate, y, displayDate, rowStyle)
-      );
+      this.contentContainer.add(this.add.text(colDate, y, displayDate, rowStyle));
     });
   }
 
@@ -185,7 +167,7 @@ export class LeaderboardScene extends Phaser.Scene {
   private showError(): void {
     this.contentContainer.removeAll(true);
 
-    const errorText = this.add.text(480, 240, 'Could not load leaderboard', {
+    const errorText = this.add.text(480, 240, t('leaderboard.error'), {
       fontSize: '18px',
       fontFamily: 'monospace',
       color: '#ff6666',
@@ -193,7 +175,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
     this.contentContainer.add(errorText);
 
-    const retryBtn = this.add.text(480, 300, '[ RETRY ]', {
+    const retryBtn = this.add.text(480, 300, t('leaderboard.retry'), {
       fontSize: '20px',
       fontFamily: 'monospace',
       color: '#44ff44',
@@ -213,10 +195,8 @@ export class LeaderboardScene extends Phaser.Scene {
 
   /**
    * Format a date string to YYYY-MM-DD.
-   * Accepts ISO 8601 or already-formatted date strings.
    */
   private formatDate(dateStr: string): string {
-    // If already in YYYY-MM-DD format, return as-is
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }

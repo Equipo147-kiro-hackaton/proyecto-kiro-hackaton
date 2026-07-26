@@ -3,6 +3,7 @@ import type { Puzzle, DifficultyMode } from '@/types';
 import { PuzzleEngine } from '@/systems/PuzzleEngine';
 import { EventBus } from '@/lib/EventBus';
 import { playSFX } from '@/lib/AudioManager';
+import { t } from '@/lib/i18n';
 
 /**
  * PuzzleScene — Overlay scene rendered at native resolution (no zoom).
@@ -92,7 +93,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     // Title — category badge (top-left)
     const categoryLabel = this.puzzle.category.toUpperCase();
-    this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 16, `[ ${categoryLabel} PUZZLE ]`, {
+    this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 16, t('puzzle.category_badge', { category: categoryLabel }), {
       fontSize: '14px', fontFamily: 'monospace', color: '#4488ff', fontStyle: 'bold',
     });
 
@@ -140,7 +141,7 @@ export class PuzzleScene extends Phaser.Scene {
     }).setOrigin(0.5).setAlpha(0);
 
     // Close button (top-right X)
-    const closeBtn = this.add.text(cx + panelW / 2 - 12, cy - panelH / 2 + 10, 'X', {
+    const closeBtn = this.add.text(cx + panelW / 2 - 12, cy - panelH / 2 + 10, t('puzzle.close'), {
       fontSize: '16px', fontFamily: 'monospace', color: '#ff4444', fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => this.handleClose());
@@ -225,7 +226,7 @@ export class PuzzleScene extends Phaser.Scene {
       .filter(d => d.toLowerCase() !== correct.toLowerCase() && d.length > 0)
       .slice(0, 3);
 
-    const fillers = ['None of the above', 'undefined', 'null'];
+    const fillers = [t('puzzle.none_above'), 'undefined', 'null'];
     while (unique.length < 3) {
       const f = fillers[unique.length] ?? `alt_${unique.length}`;
       if (f.toLowerCase() !== correct.toLowerCase()) unique.push(f);
@@ -254,7 +255,7 @@ export class PuzzleScene extends Phaser.Scene {
   private buildTextInput(cx: number, cy: number, panelW: number): void {
     this.answerInput = document.createElement('input');
     this.answerInput.type = 'text';
-    this.answerInput.placeholder = 'Type your answer...';
+    this.answerInput.placeholder = t('puzzle.answer_placeholder');
     this.answerInput.style.cssText = [
       'padding: 10px 16px', 'font-size: 16px', 'font-family: monospace',
       `width: ${panelW - 160}px`, 'border: 2px solid #4488ff', 'border-radius: 4px',
@@ -269,7 +270,7 @@ export class PuzzleScene extends Phaser.Scene {
 
     this.answerDOM = this.add.dom(cx, cy + 60, this.answerInput);
 
-    const submitBtn = this.add.text(cx, cy + 110, '[ SUBMIT ]', {
+    const submitBtn = this.add.text(cx, cy + 110, t('puzzle.submit'), {
       fontSize: '16px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     submitBtn.on('pointerover', () => submitBtn.setColor('#88ff88'));
@@ -328,13 +329,13 @@ export class PuzzleScene extends Phaser.Scene {
     this.stopTimer();
     playSFX(this, 'sfx-correct');
 
-    this.showFeedback('CORRECT!', '#44ff44');
+    this.showFeedback(t('puzzle.correct'), '#44ff44');
     this.hangmanText.setText(this.puzzle.correctAnswer).setColor('#44ff44');
 
     // Educational reinforcement
     const lastHint = this.puzzle.hints[this.puzzle.hints.length - 1] ?? '';
     const msg = lastHint.length > 70 ? lastHint.substring(0, 68) + '..' : lastHint;
-    this.hintText.setText(`\u2705 ${msg}`).setColor('#44ff88');
+    this.hintText.setText(t('puzzle.reinforcement_prefix', { hint: msg })).setColor('#44ff88');
 
     if (this.answerInput) this.answerInput.disabled = true;
 
@@ -346,7 +347,7 @@ export class PuzzleScene extends Phaser.Scene {
 
   private handleIncorrectAnswer(): void {
     playSFX(this, 'sfx-incorrect');
-    this.showFeedback('WRONG!', '#ff4444');
+    this.showFeedback(t('puzzle.wrong'), '#ff4444');
 
     if (this.answerInput) {
       this.answerInput.value = '';
@@ -359,7 +360,7 @@ export class PuzzleScene extends Phaser.Scene {
     // Educational feedback: explain WHY wrong
     const reason = this.puzzle.hints[Math.min(this.hintsShown, this.puzzle.hints.length - 1)] ?? '';
     const truncReason = reason.length > 70 ? reason.substring(0, 68) + '..' : reason;
-    this.hintText.setText(`\u2139 ${truncReason}`).setColor('#ff8844');
+    this.hintText.setText(t('puzzle.hint_prefix', { hint: truncReason })).setColor('#ff8844');
 
     if (this.difficulty === 'beginner') this.showNextHint();
     else if (this.difficulty === 'normal' && this.attemptsCount >= 2) this.showNextHint();
@@ -373,7 +374,7 @@ export class PuzzleScene extends Phaser.Scene {
     this.stopTimer();
     playSFX(this, 'sfx-damage');
 
-    this.showFeedback("TIME'S UP!", '#ff8844');
+    this.showFeedback(t('puzzle.timeout'), '#ff8844');
     this.hangmanText.setText(this.puzzle.correctAnswer).setColor('#ff8844');
     if (this.answerInput) this.answerInput.disabled = true;
     this.disableChoiceButtons();

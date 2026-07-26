@@ -14,58 +14,58 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 - [x] 0.A.3 Rewrite `.kiro/steering/tech.md` for v2 architecture — R0.1
 - [x] 0.A.4 Rewrite `.kiro/steering/structure.md` for v2 file tree — R0.1
 - [x] 0.A.5 Create `.kiro/specs/cloud-quest-v2-rpg/` (requirements, design, tasks) — R0.1
-- [ ] 0.A.6 Install ESLint + Prettier + plugins as dev dependencies — R0.4
-- [ ] 0.A.7 Write `.eslintrc.json` with `@typescript-eslint/recommended` — R0.4
-- [ ] 0.A.8 Write `.prettierrc`, `.editorconfig`, `.kiroignore` — R0.4
-- [ ] 0.A.9 Update `package.json` scripts (`lint`, `lint:fix`, `format`, `format:check`, `typecheck`) — R0.4
-- [ ] 0.A.10 Verify `lambda/tsconfig.json` exists — R0.4
-- [ ] 0.A.11 Update `.kiro/hooks/lint-on-save.json` to run ESLint too — R0.4
-- [ ] 0.A.12 Governance smoke test: TSC + tests + ESLint + build all pass
+- [x] 0.A.6 Install ESLint + Prettier + plugins as dev dependencies — R0.4
+- [x] 0.A.7 Write `.eslintrc.json` with `@typescript-eslint/recommended` — R0.4
+- [x] 0.A.8 Write `.prettierrc`, `.editorconfig`, `.kiroignore` — R0.4
+- [x] 0.A.9 Update `package.json` scripts (`lint`, `lint:fix`, `format`, `format:check`, `typecheck`) — R0.4
+- [x] 0.A.10 Verify `lambda/tsconfig.json` exists — R0.4
+- [x] 0.A.11 Update `.kiro/hooks/lint-on-save.json` to run ESLint too — R0.4
+- [x] 0.A.12 Governance smoke test: TSC + tests + ESLint + build all pass
 
 ### 0.B Cleanup
-- [ ] 0.B.1 Delete `src/scenes/GameScene.ts` (+ test if exists) — R0.1
-- [ ] 0.B.2 Delete `src/scenes/TileTestScene.ts` — R0.1
-- [ ] 0.B.3 Delete `src/systems/LevelGenerator.ts` + test — R0.1
-- [ ] 0.B.4 Delete `src/systems/ItemSystem.ts` + test — R0.1
-- [ ] 0.B.5 Delete `src/data/items.ts` — R0.1
-- [ ] 0.B.6 Delete `src/ui/PuzzleOverlay.ts` + test + `src/ui/` dir — R0.1
-- [ ] 0.B.7 Delete unused tilemaps in `public/assets/tilemaps/` — R0.1
-- [ ] 0.B.8 Delete unused tilesets in `public/assets/tilesets/` — R0.1
-- [ ] 0.B.9 Update `src/main.ts` (remove GameScene, TileTestScene imports/registrations) — R0.1
-- [ ] 0.B.10 Clean `src/types/index.ts` (remove Room, Level, LevelSequence, Item, HeroItemSlots, ItemType, orphaned RunState fields) — R0.1
-- [ ] 0.B.11 Fix references broken by cleanup (VictoryScene runState reads, etc.) — R0.1
-- [ ] 0.B.12 Cleanup smoke test: TSC + tests + ESLint + build pass
+- [x] 0.B.1 Delete `src/scenes/GameScene.ts` (+ test if exists) — R0.1
+- [x] 0.B.2 Delete `src/scenes/TileTestScene.ts` — R0.1
+- [x] 0.B.3 Delete `src/systems/LevelGenerator.ts` + test — R0.1
+- [x] 0.B.4 Delete `src/systems/ItemSystem.ts` + test — R0.1
+- [x] 0.B.5 Delete `src/data/items.ts` — R0.1
+- [x] 0.B.6 Delete `src/ui/PuzzleOverlay.ts` + test + `src/ui/` dir — R0.1
+- [x] 0.B.7 Delete unused tilemaps in `public/assets/tilemaps/` — R0.1
+- [x] 0.B.8 Delete unused tilesets in `public/assets/tilesets/` — R0.1
+- [x] 0.B.9 Update `src/main.ts` (remove GameScene, TileTestScene imports/registrations) — R0.1
+- [x] 0.B.10 Clean `src/types/index.ts` (remove Room, Level, LevelSequence, Item, HeroItemSlots, ItemType, orphaned RunState fields) — R0.1
+- [x] 0.B.11 Fix references broken by cleanup (VictoryScene runState reads, etc.) — R0.1
+- [x] 0.B.12 Cleanup smoke test: TSC + tests + ESLint + build pass
 
 ### 0.C i18n foundation
-- [ ] 0.C.1 Create `src/lib/i18n.ts` with `t`, `setLocale`, `getLocale`, `onLocaleChange` — R0.2
-- [ ] 0.C.2 Create `src/data/translations.ts` with EN + ES keys for current UI strings — R0.2
-- [ ] 0.C.3 Write `src/lib/i18n.test.ts` (param substitution, missing key fallback, persistence) — R0.2
+- [x] 0.C.1 Create `src/lib/i18n.ts` with `t`, `setLocale`, `getLocale`, `onLocaleChange` — R0.2
+- [x] 0.C.2 Create `src/data/translations.ts` with EN + ES keys for current UI strings — R0.2
+- [x] 0.C.3 Write `src/lib/i18n.test.ts` (param substitution, missing key fallback, persistence) — R0.2
 
 ### 0.D i18n refactor of scenes
-- [ ] 0.D.1 Refactor HUDScene to use `t()` — R0.2
-- [ ] 0.D.2 Refactor PuzzleScene to use `t()` — R0.2
-- [ ] 0.D.3 Refactor LoginScene + add 🌐 EN/ES toggle — R0.2
-- [ ] 0.D.4 Refactor MainMenuScene + language toggle — R0.2
-- [ ] 0.D.5 Refactor TutorialScene — R0.2
-- [ ] 0.D.6 Refactor LeaderboardScene — R0.2
-- [ ] 0.D.7 Refactor GameOverScene, VictoryScene — R0.2
-- [ ] 0.D.8 Refactor ExplorationScene status messages — R0.2
-- [ ] 0.D.9 Refactor BossFightScene — R0.2
+- [x] 0.D.1 Refactor HUDScene to use `t()` — R0.2
+- [x] 0.D.2 Refactor PuzzleScene to use `t()` — R0.2
+- [x] 0.D.3 Refactor LoginScene + add 🌐 EN/ES toggle — R0.2
+- [x] 0.D.4 Refactor MainMenuScene + language toggle — R0.2
+- [x] 0.D.5 Refactor TutorialScene — R0.2
+- [x] 0.D.6 Refactor LeaderboardScene — R0.2
+- [x] 0.D.7 Refactor GameOverScene, VictoryScene — R0.2
+- [x] 0.D.8 Refactor ExplorationScene status messages — R0.2
+- [x] 0.D.9 Refactor BossFightScene — R0.2
 
 ### 0.E Tutorial wiring
-- [ ] 0.E.1 MainMenuScene.startNewRun routes via TutorialScene on first run — R0.3
-- [ ] 0.E.2 TutorialScene.onComplete sets `cq-tutorial-done` + goes to ExplorationScene — R0.3
-- [ ] 0.E.3 Add Skip Tutorial button — R0.3
-- [ ] 0.E.4 Manual QA: first run tutorial, second run skips
+- [x] 0.E.1 MainMenuScene.startNewRun routes via TutorialScene on first run — R0.3
+- [x] 0.E.2 TutorialScene.onComplete sets `cq-tutorial-done` + goes to ExplorationScene — R0.3
+- [x] 0.E.3 Add Skip Tutorial button — R0.3
+- [x] 0.E.4 Manual QA: first run tutorial, second run skips
 
 ### 0.F Phase 0 acceptance
-- [ ] 0.F.1 `npx tsc --noEmit` clean
-- [ ] 0.F.2 `npx eslint src lambda` clean
-- [ ] 0.F.3 `npx vitest --run` no regressions
-- [ ] 0.F.4 `npm run build` succeeds
-- [ ] 0.F.5 Manual: 🌐 EN/ES toggle works
-- [ ] 0.F.6 Manual: tutorial first-run behavior
-- [ ] 0.F.7 Commit + tag `phase-0-complete`
+- [x] 0.F.1 `npx tsc --noEmit` clean
+- [x] 0.F.2 `npx eslint src lambda` clean
+- [x] 0.F.3 `npx vitest --run` no regressions (298 tests pass)
+- [x] 0.F.4 `npm run build` succeeds (44 modules, 1587 KB)
+- [x] 0.F.5 Manual: 🌐 EN/ES toggle works
+- [x] 0.F.6 Manual: tutorial first-run behavior
+- [x] 0.F.7 Commit + tag `phase-0-complete`
 
 ---
 

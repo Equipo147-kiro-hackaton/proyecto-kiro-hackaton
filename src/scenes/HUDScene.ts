@@ -1,15 +1,32 @@
 import Phaser from 'phaser';
 import { EventBus } from '@/lib/EventBus';
 import { COLORS, COLORS_HEX } from '@/lib/Colors';
+import { t, onLocaleChange } from '@/lib/i18n';
 import type { DifficultyMode } from '@/types';
+import type { TranslationKey } from '@/data/translations';
 
 /**
  * HUDScene — Right-side status panel overlay (180px wide).
  * Fixed panel showing all game state: HP, score, fragments, status, controls.
+ * Fully i18n-aware: reacts to locale changes via onLocaleChange.
  */
 
 const PANEL_WIDTH = 180;
 const PANEL_X = 960 - PANEL_WIDTH;
+
+const LEVEL_NAME_KEYS: Record<number, TranslationKey> = {
+  1: 'level.1.name',
+  2: 'level.2.name',
+  3: 'level.3.name',
+  4: 'level.4.name',
+  5: 'level.5.name',
+};
+
+const MODE_KEYS: Record<DifficultyMode, TranslationKey> = {
+  beginner: 'menu.difficulty.beginner',
+  normal: 'menu.difficulty.normal',
+  hard: 'menu.difficulty.hard',
+};
 
 export class HUDScene extends Phaser.Scene {
   private hearts: Phaser.GameObjects.Text[] = [];
@@ -25,6 +42,23 @@ export class HUDScene extends Phaser.Scene {
   private saveIndicator!: Phaser.GameObjects.Text;
   private saveTween: Phaser.Tweens.Tween | null = null;
 
+  // Labels that need locale refresh
+  private hpLabel!: Phaser.GameObjects.Text;
+  private scoreLabel!: Phaser.GameObjects.Text;
+  private fragmentsLabel!: Phaser.GameObjects.Text;
+  private statusLabel!: Phaser.GameObjects.Text;
+  private controlsLabel!: Phaser.GameObjects.Text;
+  private controlsText!: Phaser.GameObjects.Text;
+
+  // Current state for re-rendering on locale change
+  private currentLevel = 1;
+  private currentScenarioName = '';
+  private currentMode: DifficultyMode = 'normal';
+  private currentCollected = 0;
+  private currentTotal = 0;
+
+  private localeUnsubscribe: (() => void) | null = null;
+
   constructor() {
     super('HUDScene');
   }
@@ -39,6 +73,14 @@ export class HUDScene extends Phaser.Scene {
     this.createControlsSection();
     this.createSaveIndicator();
     this.setupEventListeners();
+
+    this.localeUnsubscribe = onLocaleChange(() => this.refreshTexts());
+    this.events.on('shutdown', () => {
+      if (this.localeUnsubscribe) {
+        this.localeUnsubscribe();
+        this.localeUnsubscribe = null;
+      }
+    });
   }
 
   // ─── Panel Background ───────────────────────────────────────────────────
@@ -60,7 +102,7 @@ export class HUDScene extends Phaser.Scene {
   private createLevelSection(): void {
     const x = PANEL_X + PANEL_WIDTH / 2;
 
-    this.levelText = this.add.text(x, 16, 'Level 1', {
+    this.levelText = this.add.text(x, 16, t('level.1.name'), {
       fontSize: '10px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_WHITE,
@@ -69,7 +111,7 @@ export class HUDScene extends Phaser.Scene {
       wordWrap: { width: PANEL_WIDTH - 16 },
     }).setOrigin(0.5, 0);
 
-    this.modeBadge = this.add.text(x, 44, 'NORMAL', {
+    this.modeBadge = this.add.text(x, 44, t('menu.difficulty.normal'), {
       fontSize: '8px',
       fontFamily: 'monospace',
       color: COLORS.DIFFICULTY_NORMAL,
@@ -86,7 +128,7 @@ export class HUDScene extends Phaser.Scene {
     const x = PANEL_X + 12;
     const y = 72;
 
-    this.add.text(x, y, 'HP', {
+    this.hpLabel = this.add.text(x, y, t('hud.hp'), {
       fontSize: '8px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_DIM,
@@ -139,7 +181,7 @@ export class HUDScene extends Phaser.Scene {
     const x = PANEL_X + 12;
     const y = 96;
 
-    this.add.text(x, y, 'SCORE', {
+    this.scoreLabel = this.add.text(x, y, t('hud.score'), {
       fontSize: '8px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_DIM,
@@ -173,7 +215,7 @@ export class HUDScene extends Phaser.Scene {
     const x = PANEL_X + 12;
     const y = 126;
 
-    this.add.text(x, y, 'FRAGMENTS', {
+    this.fragmentsLabel = this.add.text(x, y, t('hud.fragments'), {
       fontSize: '8px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_DIM,
@@ -211,14 +253,16 @@ export class HUDScene extends Phaser.Scene {
   }
 
   updateFragments(collected: number, total: number): void {
+    this.currentCollected = collected;
+    this.currentTotal = total;
     this.fragmentCountText.setText(`${collected}/${total}`);
     this.drawFragmentBar(collected, total);
 
     if (collected >= total && total > 0) {
-      this.statusText.setText('\u00bb DOOR UNLOCKED\n  Find the exit!');
+      this.statusText.setText(t('hud.status_unlocked'));
       this.statusText.setColor(COLORS.SUCCESS_GREEN);
     } else if (total > 0) {
-      this.statusText.setText(`Find ${total - collected} more\nfragments to\nunlock the door.`);
+      this.statusText.setText(t('hud.status_remaining', { count: total - collected }));
       this.statusText.setColor(COLORS.TEXT_DIM);
     }
   }
@@ -229,13 +273,13 @@ export class HUDScene extends Phaser.Scene {
     const x = PANEL_X + 12;
     const y = 166;
 
-    this.add.text(x, y, 'STATUS', {
+    this.statusLabel = this.add.text(x, y, t('hud.status'), {
       fontSize: '8px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_DIM,
     });
 
-    this.statusText = this.add.text(x, y + 14, 'Explore the map.\nFind fragments.', {
+    this.statusText = this.add.text(x, y + 14, t('hud.status_default'), {
       fontSize: '9px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_DIM,
@@ -252,14 +296,13 @@ export class HUDScene extends Phaser.Scene {
 
     this.addSeparator(y - 8);
 
-    this.add.text(x, y, 'CONTROLS', {
+    this.controlsLabel = this.add.text(x, y, t('hud.controls'), {
       fontSize: '7px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_MUTED,
     });
 
-    const controls = 'WASD  Move\nE     Interact\nESC   Menu\nM     Mute';
-    this.add.text(x, y + 12, controls, {
+    this.controlsText = this.add.text(x, y + 12, t('hud.controls_list'), {
       fontSize: '7px',
       fontFamily: 'monospace',
       color: COLORS.TEXT_MUTED,
@@ -277,7 +320,7 @@ export class HUDScene extends Phaser.Scene {
   }
 
   showSaveIndicator(): void {
-    this.saveIndicator.setText('SAVED \u2713');
+    this.saveIndicator.setText(t('hud.saved'));
     this.saveIndicator.setAlpha(1);
 
     if (this.saveTween) this.saveTween.stop();
@@ -301,17 +344,46 @@ export class HUDScene extends Phaser.Scene {
   // ─── Public Updaters ────────────────────────────────────────────────────
 
   updateLevel(levelNumber: number, scenarioName: string): void {
-    this.levelText.setText(`Level ${levelNumber}\n${scenarioName}`);
+    this.currentLevel = levelNumber;
+    this.currentScenarioName = scenarioName;
+    const levelKey = LEVEL_NAME_KEYS[levelNumber] ?? ('level.1.name' as TranslationKey);
+    this.levelText.setText(`${t(levelKey)}\n${scenarioName}`);
   }
 
   updateMode(mode: DifficultyMode): void {
+    this.currentMode = mode;
     const colors: Record<DifficultyMode, string> = {
       beginner: COLORS.DIFFICULTY_BEGINNER,
       normal: COLORS.DIFFICULTY_NORMAL,
       hard: COLORS.DIFFICULTY_HARD,
     };
-    this.modeBadge.setText(mode.toUpperCase());
+    this.modeBadge.setText(t(MODE_KEYS[mode]));
     this.modeBadge.setColor(colors[mode]);
+  }
+
+  // ─── Locale Refresh ─────────────────────────────────────────────────────
+
+  private refreshTexts(): void {
+    this.hpLabel.setText(t('hud.hp'));
+    this.scoreLabel.setText(t('hud.score'));
+    this.fragmentsLabel.setText(t('hud.fragments'));
+    this.statusLabel.setText(t('hud.status'));
+    this.controlsLabel.setText(t('hud.controls'));
+    this.controlsText.setText(t('hud.controls_list'));
+
+    // Re-render level and mode
+    const levelKey = LEVEL_NAME_KEYS[this.currentLevel] ?? ('level.1.name' as TranslationKey);
+    this.levelText.setText(`${t(levelKey)}\n${this.currentScenarioName}`);
+    this.modeBadge.setText(t(MODE_KEYS[this.currentMode]));
+
+    // Re-render status text based on current fragment state
+    if (this.currentCollected >= this.currentTotal && this.currentTotal > 0) {
+      this.statusText.setText(t('hud.status_unlocked'));
+    } else if (this.currentTotal > 0) {
+      this.statusText.setText(t('hud.status_remaining', { count: this.currentTotal - this.currentCollected }));
+    } else {
+      this.statusText.setText(t('hud.status_default'));
+    }
   }
 
   // ─── Event Listeners ────────────────────────────────────────────────────
