@@ -110,3 +110,44 @@ export async function getOrCreatePlayer(username: string): Promise<PlayerProfile
     clearTimeout(timeoutId);
   }
 }
+
+// ─── Bedrock Story Generation ─────────────────────────────────────────────────
+
+/** Whether Bedrock-powered story generation is enabled */
+const BEDROCK_ENABLED = import.meta.env.VITE_BEDROCK_ENABLED === 'true';
+
+interface GeneratedStory {
+  text: string;
+  learnedConcepts?: string[];
+  realWorldExample?: string;
+}
+
+/**
+ * POST /stories/generate — request AI-generated story from Bedrock Lambda.
+ * Only attempts if VITE_BEDROCK_ENABLED=true and API is configured.
+ * Returns null on failure (caller should fall back to static stories).
+ */
+export async function generateStory(
+  levelId: string,
+  type: 'intro' | 'outro',
+  locale: 'en' | 'es',
+  context: string,
+): Promise<GeneratedStory | null> {
+  if (!BEDROCK_ENABLED || !isApiConfigured()) return null;
+
+  const { controller, timeoutId } = createAbortController();
+  try {
+    const response = await fetch(`${API_BASE_URL}/stories/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ levelId, type, locale, context }),
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    return await response.json() as GeneratedStory;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}

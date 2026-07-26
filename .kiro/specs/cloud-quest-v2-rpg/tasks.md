@@ -140,30 +140,30 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 ## Phase 3 — Narrative + AI
 
 ### 3.A Story data
-- [ ] 3.A.1 src/data/stories.ts with 30+ stories — R3.1
-- [ ] 3.A.2 Include learnedConcepts + realWorldExample — R3.1
+- [x] 3.A.1 src/data/stories.ts with 30+ stories — R3.1
+- [x] 3.A.2 Include learnedConcepts + realWorldExample — R3.1
 
 ### 3.B StorySystem
-- [ ] 3.B.1 getIntroStory / getOutroStory — R3.2
-- [ ] 3.B.2 Random selection + locale fallback — R3.2
+- [x] 3.B.1 getIntroStory / getOutroStory — R3.2
+- [x] 3.B.2 Random selection + locale fallback — R3.2
 
 ### 3.C Bedrock Lambda
-- [ ] 3.C.1 lambda/generateStory.ts — R3.3
-- [ ] 3.C.2 backend.yml Bedrock IAM permission — R3.3
-- [ ] 3.C.3 ApiClient.generateStory with fallback — R3.3
-- [ ] 3.C.4 StorySystem tries Bedrock if enabled — R3.2
+- [x] 3.C.1 lambda/generateStory.ts — R3.3
+- [x] 3.C.2 backend.yml Bedrock IAM permission — R3.3
+- [x] 3.C.3 ApiClient.generateStory with fallback — R3.3
+- [x] 3.C.4 StorySystem tries Bedrock if enabled — R3.2
 
 ### 3.D UI
-- [ ] 3.D.1 IntroCutsceneScene (typewriter) — R3.4
-- [ ] 3.D.2 LearningSummaryScene — R3.4
-- [ ] 3.D.3 Wire intro before gameplay — R3.4
-- [ ] 3.D.4 Wire summary after boss — R3.4
+- [x] 3.D.1 IntroCutsceneScene (typewriter) — R3.4
+- [x] 3.D.2 LearningSummaryScene — R3.4
+- [x] 3.D.3 Wire intro before gameplay — R3.4
+- [x] 3.D.4 Wire summary after boss — R3.4
 
 ### 3.E Phase 3 acceptance
-- [ ] 3.E.1 Each level has intro + outro
-- [ ] 3.E.2 QA BEDROCK_ENABLED=false works
-- [ ] 3.E.3 QA BEDROCK_ENABLED=true works
-- [ ] 3.E.4 Commit + tag `phase-3-complete`
+- [x] 3.E.1 Each level has intro + outro
+- [x] 3.E.2 QA BEDROCK_ENABLED=false works
+- [x] 3.E.3 QA BEDROCK_ENABLED=true works
+- [x] 3.E.4 Commit + tag `phase-3-complete`
 
 ---
 

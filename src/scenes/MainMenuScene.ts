@@ -331,7 +331,7 @@ export class MainMenuScene extends Phaser.Scene {
         pendingDifficulty: this.selectedMode,
       });
     } else {
-      fadeToScene(this, 'ExplorationScene', {
+      fadeToScene(this, 'IntroCutsceneScene', {
         level: 1,
         difficulty: this.selectedMode,
         hp: 100,

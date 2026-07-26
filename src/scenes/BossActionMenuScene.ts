@@ -397,18 +397,34 @@ export class BossActionMenuScene extends Phaser.Scene {
 
     this.time.delayedCall(2000, () => {
       if (this.sceneData.currentLevel >= getTotalLevels()) {
-        this.scene.start('VictoryScene', {
-          score: this.sceneData.score,
-          levelReached: this.sceneData.currentLevel,
-          bugsDefeated: this.sceneData.currentLevel,
-          puzzlesSolved: this.turnCount,
-        });
-      } else {
-        this.scene.start('ExplorationScene', {
-          level: this.sceneData.currentLevel + 1,
+        this.scene.start('LearningSummaryScene', {
+          level: this.sceneData.currentLevel,
           difficulty: this.sceneData.difficulty,
           hp: this.state.heroHearts * 25,
           score: this.sceneData.score + 200,
+          puzzlesSolved: this.turnCount,
+          nextScene: 'VictoryScene',
+          nextSceneData: {
+            score: this.sceneData.score + 200,
+            levelReached: this.sceneData.currentLevel,
+            bugsDefeated: this.sceneData.currentLevel,
+            puzzlesSolved: this.turnCount,
+          },
+        });
+      } else {
+        this.scene.start('LearningSummaryScene', {
+          level: this.sceneData.currentLevel,
+          difficulty: this.sceneData.difficulty,
+          hp: this.state.heroHearts * 25,
+          score: this.sceneData.score + 200,
+          puzzlesSolved: this.turnCount,
+          nextScene: 'IntroCutsceneScene',
+          nextSceneData: {
+            level: this.sceneData.currentLevel + 1,
+            difficulty: this.sceneData.difficulty,
+            hp: this.state.heroHearts * 25,
+            score: this.sceneData.score + 200,
+          },
         });
       }
     });

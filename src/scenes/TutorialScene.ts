@@ -152,7 +152,7 @@ export class TutorialScene extends Phaser.Scene {
   private completeAndStart(): void {
     localStorage.setItem(TUTORIAL_DONE_KEY, 'true');
     this.game.registry.set('tutorialDone', true);
-    fadeToScene(this, 'ExplorationScene', {
+    fadeToScene(this, 'IntroCutsceneScene', {
       level: 1,
       difficulty: this.pendingDifficulty,
       hp: 100,
