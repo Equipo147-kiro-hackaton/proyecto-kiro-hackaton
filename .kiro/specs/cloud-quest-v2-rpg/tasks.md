@@ -108,32 +108,32 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 ## Phase 2 — Boss Variations
 
 ### 2.A Type A (Pipeline, refactor)
-- [ ] 2.A.1 Boss sprite with idle + damage anims — R2.2
-- [ ] 2.A.2 Fragment icons — R2.2
-- [ ] 2.A.3 Slot placement animation — R2.2
+- [x] 2.A.1 Boss sprite with idle + damage anims — R2.2
+- [x] 2.A.2 Fragment icons — R2.2
+- [x] 2.A.3 Slot placement animation — R2.2
 
 ### 2.B Type B (JRPG Action Menu)
-- [ ] 2.B.1 Create BossActionMenuScene — R2.3
-- [ ] 2.B.2 4 action cards (A/B/C/D) — R2.3
-- [ ] 2.B.3 Turn-based state machine — R2.3
-- [ ] 2.B.4 Typewriter dialogue box — R2.3
-- [ ] 2.B.5 Backup action (1 use) — R2.3
-- [ ] 2.B.6 Update tech.md with JRPG formulas
+- [x] 2.B.1 Create BossActionMenuScene — R2.3
+- [x] 2.B.2 4 action cards (A/B/C/D) — R2.3
+- [x] 2.B.3 Turn-based state machine — R2.3
+- [x] 2.B.4 Typewriter dialogue box — R2.3
+- [x] 2.B.5 Backup action (1 use) — R2.3
+- [x] 2.B.6 Update tech.md with JRPG formulas
 
 ### 2.C Type C (Rush Mode)
-- [ ] 2.C.1 Create BossRushScene — R2.4
-- [ ] 2.C.2 90s timer + boss auto-attack — R2.4
-- [ ] 2.C.3 +5s bonus per correct — R2.4
-- [ ] 2.C.4 Update tech.md with Rush formulas
+- [x] 2.C.1 Create BossRushScene — R2.4
+- [x] 2.C.2 90s timer + boss auto-attack — R2.4
+- [x] 2.C.3 +5s bonus per correct — R2.4
+- [x] 2.C.4 Update tech.md with Rush formulas
 
 ### 2.D Dispatcher
-- [ ] 2.D.1 BOSS_TYPE_BY_LEVEL constant — R2.1
-- [ ] 2.D.2 BossFightScene dispatches — R2.1
-- [ ] 2.D.3 Register new scenes in main.ts — R2.1
+- [x] 2.D.1 BOSS_TYPE_BY_LEVEL constant — R2.1
+- [x] 2.D.2 BossFightScene dispatches — R2.1
+- [x] 2.D.3 Register new scenes in main.ts — R2.1
 
 ### 2.E Phase 2 acceptance
-- [ ] 2.E.1 All 5 levels playable, 3 boss types work
-- [ ] 2.E.2 Commit + tag `phase-2-complete`
+- [x] 2.E.1 All 5 levels playable, 3 boss types work
+- [x] 2.E.2 Commit + tag `phase-2-complete`
 
 ---
 

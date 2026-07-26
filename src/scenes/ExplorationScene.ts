@@ -14,7 +14,7 @@ import {
 import { FragmentSystem } from '@/systems/FragmentSystem';
 import { PuzzleEngine } from '@/systems/PuzzleEngine';
 import { getMapConfig, type ScenarioType } from '@/systems/MapLoader';
-import { getLevelDefinition } from '@/data/levels';
+import { getLevelDefinition, getBossSceneKey } from '@/data/levels';
 import { getDifficultyConfig, canSaveAtProgress, calculateProgress } from '@/systems/DifficultySystem';
 import { saveGame, createSaveData } from '@/systems/SaveSystem';
 import { playSFX } from '@/lib/AudioManager';
@@ -730,7 +730,8 @@ export class ExplorationScene extends Phaser.Scene {
   private transitionToBoss(): void {
     this.scene.stop('HUDScene');
     const ld = getLevelDefinition(this.currentLevel);
-    this.scene.start('BossFightScene', { levelId: ld?.id ?? 'level-1', difficulty: this.difficulty, currentLevel: this.currentLevel, score: this.score, heroHP: this.heroHP, bossName: ld?.bossName ?? 'Boss', pipelineOrder: ld?.pipelineOrder ?? [] });
+    const bossScene = getBossSceneKey(this.currentLevel);
+    this.scene.start(bossScene, { levelId: ld?.id ?? 'level-1', difficulty: this.difficulty, currentLevel: this.currentLevel, score: this.score, heroHP: this.heroHP, bossName: ld?.bossName ?? 'Boss', pipelineOrder: ld?.pipelineOrder ?? [] });
   }
 
   private onDefeat(): void { this.scene.stop('HUDScene'); this.scene.start('GameOverScene', { score: this.score, levelReached: this.currentLevel, bugsDefeated: 0, puzzlesSolved: 0 }); }

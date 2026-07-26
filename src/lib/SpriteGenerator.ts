@@ -381,3 +381,82 @@ function drawDoor(ctx: CanvasRenderingContext2D): void {
   ctx.fillStyle = '#444444';
   ctx.fillRect(4, 0, 8, 2);
 }
+
+// ─── Boss Sprites ─────────────────────────────────────────────────────────────
+
+/**
+ * Generate a large boss sprite (32x32) for Type A boss fights.
+ * Creates a menacing pixel-art bug boss with glowing eyes.
+ */
+export function generateBossSprite(scene: Phaser.Scene): void {
+  if (scene.textures.exists('boss-sprite')) return;
+
+  const size = 32;
+  const cols = 2; // 2 frames: idle, damage
+  const canvas = document.createElement('canvas');
+  canvas.width = size * cols;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Frame 0: idle
+  drawBossFrame(ctx, 0, 0, false);
+  // Frame 1: damage (flash)
+  drawBossFrame(ctx, size, 0, true);
+
+  scene.textures.addCanvas('boss-sprite', canvas);
+  const tex = scene.textures.get('boss-sprite');
+  if (tex) {
+    tex.add(0, 0, 0, 0, size, size);
+    tex.add(1, 0, size, 0, size, size);
+  }
+}
+
+function drawBossFrame(ctx: CanvasRenderingContext2D, x: number, y: number, isDamaged: boolean): void {
+  const bodyColor = isDamaged ? '#ff4444' : '#881122';
+  const shellColor = isDamaged ? '#cc2222' : '#550011';
+  const eyeColor = isDamaged ? '#ffffff' : '#ffff00';
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(x + 6, y + 28, 20, 3);
+
+  // Body (large oval)
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(x + 6, y + 8, 20, 18);
+  ctx.fillRect(x + 4, y + 10, 24, 14);
+
+  // Shell pattern
+  ctx.fillStyle = shellColor;
+  ctx.fillRect(x + 14, y + 8, 4, 18);
+  ctx.fillRect(x + 6, y + 16, 20, 3);
+
+  // Head
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(x + 9, y + 3, 14, 8);
+
+  // Eyes (large, menacing)
+  ctx.fillStyle = eyeColor;
+  ctx.fillRect(x + 10, y + 5, 4, 4);
+  ctx.fillRect(x + 18, y + 5, 4, 4);
+  ctx.fillStyle = '#cc0000';
+  ctx.fillRect(x + 11, y + 7, 2, 2);
+  ctx.fillRect(x + 19, y + 7, 2, 2);
+
+  // Horns/antennae
+  ctx.fillStyle = '#ffcc00';
+  ctx.fillRect(x + 10, y + 1, 2, 4);
+  ctx.fillRect(x + 20, y + 1, 2, 4);
+
+  // Legs (8 legs)
+  ctx.fillStyle = shellColor;
+  for (let i = 0; i < 4; i++) {
+    ctx.fillRect(x + 4, y + 12 + i * 4, 3, 2);
+    ctx.fillRect(x + 25, y + 12 + i * 4, 3, 2);
+  }
+
+  // Mandibles
+  ctx.fillStyle = '#cc4400';
+  ctx.fillRect(x + 12, y + 10, 2, 3);
+  ctx.fillRect(x + 18, y + 10, 2, 3);
+}

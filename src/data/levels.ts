@@ -96,3 +96,33 @@ export function getLevelById(levelId: string): LevelDefinition | undefined {
 export function getTotalLevelCount(): number {
   return LEVEL_DEFINITIONS.length;
 }
+
+// ─── Boss Type Dispatcher ─────────────────────────────────────────────────────
+
+export type BossType = 'pipeline' | 'jrpg' | 'rush';
+
+/**
+ * Maps each level to a boss type:
+ * L1, L4 = Type A (Pipeline)
+ * L2, L5 = Type B (JRPG Action Menu)
+ * L3 = Type C (Rush Mode)
+ */
+export const BOSS_TYPE_BY_LEVEL: Record<number, BossType> = {
+  1: 'pipeline',
+  2: 'jrpg',
+  3: 'rush',
+  4: 'pipeline',
+  5: 'jrpg',
+};
+
+/**
+ * Get boss scene key for a given level number.
+ */
+export function getBossSceneKey(levelNumber: number): string {
+  const bossType = BOSS_TYPE_BY_LEVEL[levelNumber] ?? 'pipeline';
+  switch (bossType) {
+    case 'pipeline': return 'BossFightScene';
+    case 'jrpg': return 'BossActionMenuScene';
+    case 'rush': return 'BossRushScene';
+  }
+}

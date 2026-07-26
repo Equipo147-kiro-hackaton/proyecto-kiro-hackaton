@@ -8,6 +8,8 @@ import { LeaderboardScene } from '@/scenes/LeaderboardScene';
 import { HUDScene } from '@/scenes/HUDScene';
 import { ExplorationScene } from '@/scenes/ExplorationScene';
 import { BossFightScene } from '@/scenes/BossFightScene';
+import { BossActionMenuScene } from '@/scenes/BossActionMenuScene';
+import { BossRushScene } from '@/scenes/BossRushScene';
 import { PuzzleScene } from '@/scenes/PuzzleScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -38,6 +40,8 @@ const config: Phaser.Types.Core.GameConfig = {
     HUDScene,
     ExplorationScene,
     BossFightScene,
+    BossActionMenuScene,
+    BossRushScene,
     PuzzleScene,
   ],
   parent: 'game-container',
