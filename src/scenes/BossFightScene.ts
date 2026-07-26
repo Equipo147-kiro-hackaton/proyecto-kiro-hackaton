@@ -6,6 +6,7 @@ import { getTotalLevels } from '@/systems/MapLoader';
 import { playSFX } from '@/lib/AudioManager';
 import { screenShake, screenFlash, floatingText, bossDamageFlash } from '@/systems/FeedbackSystem';
 import { generateBossSprite } from '@/lib/SpriteGenerator';
+import { playMusic } from '@/lib/MusicManager';
 import { t } from '@/lib/i18n';
 import type { DifficultyMode, Fragment } from '@/types';
 
@@ -42,6 +43,7 @@ export class BossFightScene extends Phaser.Scene {
 
   create(): void {
     generateBossSprite(this);
+    playMusic('boss');
 
     this.state = createBossFightState();
     this.fragmentSystem = new FragmentSystem();

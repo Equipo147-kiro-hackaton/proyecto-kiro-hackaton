@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import { COLORS, COLORS_HEX } from '@/lib/Colors';
 import { t, getLocale, toggleLocale, onLocaleChange } from '@/lib/i18n';
+import { playMusic, updateMusicVolume, stopMusic } from '@/lib/MusicManager';
+import { toggleMute } from '@/lib/AudioManager';
 import { getMostRecentSave } from '@/systems/SaveSystem';
 import type { PlayerProfile, DifficultyMode } from '@/types';
 
@@ -38,6 +40,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   create(): void {
     fadeIn(this);
+    playMusic('menu');
     this.createBackground();
     this.createLanguageToggle();
     this.createHeader();
@@ -285,6 +288,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
     this.input.keyboard?.on('keydown-ENTER', () => this.startNewRun());
     this.input.keyboard?.on('keydown-L', () => fadeToScene(this, 'LeaderboardScene'));
+    this.input.keyboard?.on('keydown-M', () => this.handleMuteToggle());
   }
 
   private updateModeSelection(): void {
@@ -322,6 +326,16 @@ export class MainMenuScene extends Phaser.Scene {
     this.leaderboardBtn.setText(t('menu.leaderboard'));
     this.footerHintText.setText(t('menu.footer_hint'));
     this.languageToggleBtn.setText(`\ud83c\udf10 ${getLocale().toUpperCase()}`);
+  }
+
+  private handleMuteToggle(): void {
+    const muted = toggleMute();
+    if (muted) {
+      stopMusic();
+    } else {
+      playMusic('menu');
+    }
+    updateMusicVolume();
   }
 
   private startNewRun(): void {

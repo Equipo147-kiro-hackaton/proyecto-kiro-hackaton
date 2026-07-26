@@ -170,22 +170,22 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 ## Phase 4 — Audio
 
 ### 4.A Assets
-- [ ] 4.A.1 Download CC0 SFX pack — R4.1
-- [ ] 4.A.2 Download CC0 music — R4.1
-- [ ] 4.A.3 Place in public/assets/sounds — R4.1
+- [x] 4.A.1 Download CC0 SFX pack — R4.1
+- [x] 4.A.2 Download CC0 music — R4.1
+- [x] 4.A.3 Place in public/assets/sounds — R4.1
 
 ### 4.B MusicManager
-- [ ] 4.B.1 playMusic + stopMusic + crossfade — R4.2
-- [ ] 4.B.2 Scene transitions crossfade — R4.2
+- [x] 4.B.1 playMusic + stopMusic + crossfade — R4.2
+- [x] 4.B.2 Scene transitions crossfade — R4.2
 
 ### 4.C Volume
-- [ ] 4.C.1 Options slider — R4.3
-- [ ] 4.C.2 M key mute — R4.3
-- [ ] 4.C.3 Persistence — R4.3
+- [x] 4.C.1 Options slider — R4.3
+- [x] 4.C.2 M key mute — R4.3
+- [x] 4.C.3 Persistence — R4.3
 
 ### 4.D Phase 4 acceptance
-- [ ] 4.D.1 QA: every scene has audio
-- [ ] 4.D.2 Commit + tag `phase-4-complete`
+- [x] 4.D.1 QA: every scene has audio
+- [x] 4.D.2 Commit + tag `phase-4-complete`
 
 ---
 

@@ -17,11 +17,12 @@ import { getMapConfig, type ScenarioType } from '@/systems/MapLoader';
 import { getLevelDefinition, getBossSceneKey } from '@/data/levels';
 import { getDifficultyConfig, canSaveAtProgress, calculateProgress } from '@/systems/DifficultySystem';
 import { saveGame, createSaveData } from '@/systems/SaveSystem';
-import { playSFX } from '@/lib/AudioManager';
+import { playSFX, toggleMute } from '@/lib/AudioManager';
 import { screenShake, screenFlash, floatingText, sparkleEffect, doorGlowEffect } from '@/systems/FeedbackSystem';
 import { COLORS_HEX } from '@/lib/Colors';
 import { EventBus } from '@/lib/EventBus';
 import { generateAllSprites } from '@/lib/SpriteGenerator';
+import { playMusic, stopMusic, updateMusicVolume, type MusicTrack } from '@/lib/MusicManager';
 import { generateProceduralMap, registerProceduralMap } from '@/lib/ProceduralMap';
 import { t } from '@/lib/i18n';
 import { HERO_VARIANT_BY_DIFFICULTY } from '@/types';
@@ -107,6 +108,10 @@ export class ExplorationScene extends Phaser.Scene {
 
     // Generate procedural sprites
     generateAllSprites(this);
+
+    // Play scenario-appropriate music
+    const scenarioToTrack: Record<string, MusicTrack> = { office: 'office', server: 'server', cloud: 'cloud' };
+    playMusic(scenarioToTrack[mc.scenario] ?? 'office');
 
     this.fragmentSystem = new FragmentSystem();
     this.puzzleEngine = new PuzzleEngine();
@@ -542,6 +547,7 @@ export class ExplorationScene extends Phaser.Scene {
     this.wasdKeys = { W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W), A: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A), S: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S), D: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D) };
     this.input.keyboard.on('keydown-E', () => this.handleInteraction());
     this.input.keyboard.on('keydown-ESC', () => { this.scene.stop('HUDScene'); this.scene.start('MainMenuScene'); });
+    this.input.keyboard.on('keydown-M', () => { const muted = toggleMute(); if (muted) stopMusic(); else { const mc = getMapConfig(this.currentLevel); const scenarioToTrack: Record<string, MusicTrack> = { office: 'office', server: 'server', cloud: 'cloud' }; playMusic(scenarioToTrack[mc?.scenario ?? 'office'] ?? 'office'); } updateMusicVolume(); });
   }
 
   private handleMovementInput(): void {

@@ -7,6 +7,7 @@ import { getLevelDefinition } from '@/data/levels';
 import { playSFX } from '@/lib/AudioManager';
 import { screenShake, screenFlash, floatingText } from '@/systems/FeedbackSystem';
 import { generateBossSprite } from '@/lib/SpriteGenerator';
+import { playMusic } from '@/lib/MusicManager';
 import { t } from '@/lib/i18n';
 import type { DifficultyMode, Puzzle } from '@/types';
 
@@ -57,6 +58,7 @@ export class BossRushScene extends Phaser.Scene {
 
   create(): void {
     generateBossSprite(this);
+    playMusic('boss');
     this.state = createBossFightState();
     this.puzzleEngine = new PuzzleEngine();
     this.combo = 0;
