@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ScoreSystem } from '@/systems/ScoreSystem';
-import { LevelGenerator } from '@/systems/LevelGenerator';
+import { submitScore as submitScoreLocal, updatePersonalBest } from '@/lib/LocalStorageService';
+import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import type { GameOverData, RunResult } from '@/types';
 
 /**
@@ -24,6 +25,7 @@ export class GameOverScene extends Phaser.Scene {
 
   create(): void {
     this.scoreSystem = new ScoreSystem();
+    fadeIn(this);
 
     this.displayResults();
     this.createButtons();
@@ -102,15 +104,11 @@ export class GameOverScene extends Phaser.Scene {
   }
 
   /**
-   * Start a new run: reset RunState (HP=100, items=[], score=0, level=1),
-   * preserve username, generate new levels, transition to GameScene.
+   * Start a new run: return to MainMenu for difficulty selection.
    * Requirement: 8.5
    */
   private startNewRun(): void {
-    // GameScene.create() already initializes a fresh RunState from playerProfile,
-    // so we just need to start the scene. The LevelGenerator.generate() is called
-    // inside GameScene.initRunState().
-    this.scene.start('GameScene');
+    fadeToScene(this, 'MainMenuScene');
   }
 
   /**
@@ -118,23 +116,28 @@ export class GameOverScene extends Phaser.Scene {
    * Requirement: 8.6
    */
   private viewLeaderboard(): void {
-    this.scene.start('LeaderboardScene');
+    fadeToScene(this, 'LeaderboardScene');
   }
 
   /**
-   * Submit the run score to the backend via ScoreSystem.
+   * Submit the run score to the backend via ScoreSystem and save locally.
    * Requirement: 8.3
    */
   private submitScoreToBackend(): void {
+    const username = this.game.registry.get('playerProfile')?.username ?? 'anonymous';
+
+    // Always save to localStorage (offline-first)
+    submitScoreLocal(username, this.gameOverData.score);
+    updatePersonalBest(username, this.gameOverData.score);
+
+    // Also attempt API submission (fire and forget)
     const result: RunResult = {
-      username: this.game.registry.get('playerProfile')?.username ?? 'anonymous',
+      username,
       score: this.gameOverData.score,
       highestLevel: this.gameOverData.levelReached,
       totalPuzzlesSolved: this.gameOverData.puzzlesSolved,
       totalBugsDefeated: this.gameOverData.bugsDefeated,
     };
-
-    // Fire and forget — ScoreSystem handles retry logic internally
     this.scoreSystem.submitScore(result);
   }
 }

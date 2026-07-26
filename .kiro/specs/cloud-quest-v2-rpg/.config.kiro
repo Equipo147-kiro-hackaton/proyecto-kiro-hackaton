@@ -1,0 +1,10 @@
+{
+  "specName": "cloud-quest-v2-rpg",
+  "version": "2.0.0",
+  "createdAt": "2026-01-25",
+  "status": "active",
+  "description": "Cloud Quest RPG overhaul: i18n EN/ES, 3 hero variants by difficulty, 3 alternating boss types (Pipeline/JRPG/Rush), AI-generated stories via Bedrock, professional visual polish, real audio, learning summaries. Executed in 6 phases (0-5).",
+  "relatedSpecs": {
+    "predecessor": ".kiro/specs/_archive/cloud-quest-devops-dungeon/"
+  }
+}

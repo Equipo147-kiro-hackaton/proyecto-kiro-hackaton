@@ -99,11 +99,26 @@ export function loadLeaderboard(): LeaderboardEntry[] {
 
 /**
  * Submit a score to the leaderboard.
- * Maintains only the top 10 entries.
+ * Only keeps the BEST score per username (one entry per player).
  * Returns the position (1-based) if it made the leaderboard, or null if not.
  */
 export function submitScore(username: string, score: number): number | null {
   const entries = loadLeaderboard();
+
+  // Check if user already has an entry
+  const existingIndex = entries.findIndex(
+    (e) => e.username.toLowerCase() === username.toLowerCase()
+  );
+
+  if (existingIndex !== -1) {
+    // Only update if new score is higher
+    if (score <= entries[existingIndex].score) {
+      // Score not better — return existing position
+      return existingIndex + 1;
+    }
+    // Remove old entry (will be replaced with new higher score)
+    entries.splice(existingIndex, 1);
+  }
 
   const newEntry: LeaderboardEntry = {
     username,
@@ -122,7 +137,7 @@ export function submitScore(username: string, score: number): number | null {
   }
 
   const position = trimmed.findIndex(
-    (e) => e.username === username && e.score === score && e.runDate === newEntry.runDate
+    (e) => e.username.toLowerCase() === username.toLowerCase() && e.score === score
   );
 
   if (position === -1) return null;

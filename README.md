@@ -211,7 +211,15 @@ proyecto-kiro-hackaton/
 
 ## 🧪 Testing
 
-El proyecto usa **property-based testing** con `fast-check` para validar las 20 propiedades de correctness del diseño:
+**316 tests pasando** en 21 archivos de test. El proyecto usa **property-based testing** con `fast-check`:
+
+```powershell
+# Ejecutar todos los tests
+npx vitest --run
+
+# Con cobertura
+npx vitest --run --coverage
+```
 
 ```typescript
 // Ejemplo: Property 7 — Damage formula clamp
@@ -227,13 +235,26 @@ test('Property 7: damage formula clamp', () => {
 
 ---
 
-## ☁️ Despliegue en AWS Amplify
+## ☁️ Despliegue
 
-1. Conecta el repositorio a AWS Amplify
-2. Amplify detectará `amplify.yml` automáticamente
-3. Configura la variable de entorno `VITE_API_BASE_URL` en la consola de Amplify
-4. Despliega las Lambda functions y API Gateway
-5. El juego quedará disponible en una URL HTTPS pública
+### Backend (API Gateway + Lambda + DynamoDB)
+
+```powershell
+# Deploy completo (un solo comando)
+.\infra\scripts\deploy.ps1
+
+# Destruir todo (zero costos zombie)
+.\infra\scripts\destroy.ps1
+```
+
+Ver guia completa: [`infra/DEPLOY-GUIDE.md`](infra/DEPLOY-GUIDE.md)
+
+### Frontend (AWS Amplify Hosting)
+
+1. Conecta el repo a AWS Amplify Console
+2. Amplify detecta `amplify.yml` automaticamente
+3. Configura variable `VITE_API_BASE_URL` con la URL del API
+4. El juego queda disponible en una URL HTTPS publica
 
 ---
 
@@ -282,11 +303,11 @@ chore: configurar Amplify build spec
 
 ## 📋 Entregables del Hackathon
 
-- [x] Repositorio público en GitHub con README completo
-- [ ] Demo pública accesible por URL HTTPS
-- [ ] Flujo completo jugable: login → juego → game over → leaderboard
-- [ ] Video de presentación (máximo 5 minutos)
-- [ ] Spec completo: requirements, design, tasks (en `.kiro/specs/`)
+- [x] Repositorio publico en GitHub con README completo
+- [x] Flujo completo jugable: login -> juego -> game over -> leaderboard
+- [x] Spec completo: requirements, design, tasks (en `.kiro/specs/`)
+- [ ] Demo publica accesible por URL HTTPS (deploy con `.\infra\scripts\deploy.ps1` + Amplify)
+- [ ] Video de presentacion (maximo 5 minutos)
 
 ---
 

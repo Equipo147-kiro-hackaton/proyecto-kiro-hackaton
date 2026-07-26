@@ -1,0 +1,292 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Cloud Quest: DevOps Dungeon — Complete Backend (DynamoDB + IAM + Lambda + API Gateway)'
+
+Parameters:
+  TableName:
+    Type: String
+    Default: cloud-quest-scores
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket containing Lambda deployment packages
+  LambdaCodePrefix:
+    Type: String
+    Default: cloud-quest-lambda
+    Description: S3 key prefix for Lambda zip files
+
+Resources:
+  # ─── DynamoDB Table ──────────────────────────────────────────────────────────
+  ScoresTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: runId
+          AttributeType: S
+        - AttributeName: gameId
+          AttributeType: S
+        - AttributeName: score
+          AttributeType: N
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+        - AttributeName: runId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: ScoreIndex
+          KeySchema:
+            - AttributeName: gameId
+              KeyType: HASH
+            - AttributeName: score
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Project
+          Value: cloud-quest-devops-dungeon
+
+  # ─── IAM Role for Lambda ─────────────────────────────────────────────────────
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    DeletionPolicy: Delete
+    Properties:
+      RoleName: cloud-quest-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CloudQuestDynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt ScoresTable.Arn
+                  - !Sub '${ScoresTable.Arn}/index/ScoreIndex'
+
+  # ─── Lambda Functions ────────────────────────────────────────────────────────
+  SubmitScoreFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Delete
+    Properties:
+      FunctionName: cloud-quest-submit-score
+      Runtime: nodejs20.x
+      Handler: submitScore.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Sub '${LambdaCodePrefix}/submitScore.zip'
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref TableName
+      Tags:
+        - Key: Project
+          Value: cloud-quest-devops-dungeon
+
+  GetLeaderboardFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Delete
+    Properties:
+      FunctionName: cloud-quest-get-leaderboard
+      Runtime: nodejs20.x
+      Handler: getLeaderboard.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Sub '${LambdaCodePrefix}/getLeaderboard.zip'
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref TableName
+      Tags:
+        - Key: Project
+          Value: cloud-quest-devops-dungeon
+
+  GetOrCreatePlayerFunction:
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Delete
+    Properties:
+      FunctionName: cloud-quest-get-or-create-player
+      Runtime: nodejs20.x
+      Handler: getOrCreatePlayer.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Sub '${LambdaCodePrefix}/getOrCreatePlayer.zip'
+      Timeout: 10
+      MemorySize: 128
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref TableName
+      Tags:
+        - Key: Project
+          Value: cloud-quest-devops-dungeon
+
+  # ─── API Gateway ────────────────────────────────────────────────────────────
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    DeletionPolicy: Delete
+    Properties:
+      Name: cloud-quest-api
+      Description: Cloud Quest DevOps Dungeon REST API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # /scores resource
+  ScoresResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: scores
+
+  # /players resource
+  PlayersResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: players
+
+  # POST /scores
+  PostScoresMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ScoresResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitScoreFunction.Arn}/invocations'
+
+  # GET /scores
+  GetScoresMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ScoresResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLeaderboardFunction.Arn}/invocations'
+
+  # OPTIONS /scores (CORS)
+  OptionsScoresMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ScoresResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetLeaderboardFunction.Arn}/invocations'
+
+  # POST /players
+  PostPlayersMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref PlayersResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetOrCreatePlayerFunction.Arn}/invocations'
+
+  # OPTIONS /players (CORS)
+  OptionsPlayersMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref PlayersResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetOrCreatePlayerFunction.Arn}/invocations'
+
+  # Lambda permissions for API Gateway
+  SubmitScorePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SubmitScoreFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
+
+  GetLeaderboardPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetLeaderboardFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
+
+  GetOrCreatePlayerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetOrCreatePlayerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
+
+  # API Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - PostScoresMethod
+      - GetScoresMethod
+      - OptionsScoresMethod
+      - PostPlayersMethod
+      - OptionsPlayersMethod
+    Properties:
+      RestApiId: !Ref ApiGateway
+
+  # API Stage
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    DeletionPolicy: Delete
+    Properties:
+      RestApiId: !Ref ApiGateway
+      DeploymentId: !Ref ApiDeployment
+      StageName: prod
+
+Outputs:
+  ApiUrl:
+    Description: Base URL for the API (set this as VITE_API_BASE_URL)
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Export:
+      Name: CloudQuestApiUrl
+  TableName:
+    Value: !Ref ScoresTable
+  TableArn:
+    Value: !GetAtt ScoresTable.Arn
+  LambdaRoleArn:
+    Value: !GetAtt LambdaExecutionRole.Arn

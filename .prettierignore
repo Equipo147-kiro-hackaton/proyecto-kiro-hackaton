@@ -2,6 +2,5 @@ dist/
 coverage/
 node_modules/
 lambda-build/
-*.log
-.DS_Store
-tsconfig.lambda.json
+public/assets/
+.kiro/specs/_archive/

@@ -1,70 +1,117 @@
-# Structure — Cloud Quest: DevOps Dungeon
+# Structure — Cloud Quest: DevOps Dungeon (v2 RPG)
 
-## Árbol de Directorios Completo
+## Complete Directory Tree
 
 ```
 proyecto-kiro-hackaton/
 │
 ├── .kiro/
 │   ├── specs/
-│   │   └── cloud-quest-devops-dungeon/
-│   │       ├── .config.kiro
-│   │       ├── requirements.md
-│   │       ├── design.md
-│   │       └── tasks.md
+│   │   ├── cloud-quest-v2-rpg/         ← ACTIVE spec (v2)
+│   │   │   ├── .config.kiro
+│   │   │   ├── requirements.md
+│   │   │   ├── design.md
+│   │   │   └── tasks.md
+│   │   └── _archive/
+│   │       └── cloud-quest-devops-dungeon/  ← v1 spec (historical evidence)
 │   ├── steering/
-│   │   ├── product.md        ← Visión, alcance, glosario
-│   │   ├── tech.md           ← Stack, patrones, convenciones
-│   │   └── structure.md      ← Este archivo
+│   │   ├── product.md
+│   │   ├── tech.md
+│   │   └── structure.md                ← this file
+│   ├── agents/                         ← 6 specialized sub-agents
+│   ├── skills/                         ← 5 domain-knowledge skills
+│   ├── hooks/                          ← 6 quality-gate hooks
 │   └── settings/
-│       └── mcp.json          ← Configuración MCP del workspace
+│       └── mcp.json
+│
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       ├── cd.yml
+│       └── quality-gates.yml
 │
 ├── src/
-│   ├── main.ts               ← Entry point de Phaser.Game
-│   │
-│   ├── scenes/               ← Una clase por escena, extienden Phaser.Scene
+│   ├── main.ts
+│   ├── scenes/                         ← 10 scenes, extend Phaser.Scene
 │   │   ├── LoginScene.ts
 │   │   ├── MainMenuScene.ts
 │   │   ├── TutorialScene.ts
-│   │   ├── GameScene.ts
-│   │   ├── GameOverScene.ts
+│   │   ├── ExplorationScene.ts
+│   │   ├── HUDScene.ts
+│   │   ├── PuzzleScene.ts
+│   │   ├── BossFightScene.ts
 │   │   ├── VictoryScene.ts
+│   │   ├── GameOverScene.ts
 │   │   └── LeaderboardScene.ts
-│   │
-│   ├── systems/              ← Lógica de juego pura (sin dependencia de Phaser)
+│   ├── systems/                        ← Pure logic, Phaser-independent
 │   │   ├── PuzzleEngine.ts
-│   │   ├── LevelGenerator.ts
-│   │   ├── ItemSystem.ts
-│   │   └── ScoreSystem.ts
-│   │
-│   ├── lib/                  ← Utilidades y servicios compartidos
+│   │   ├── ScoreSystem.ts
+│   │   ├── FragmentSystem.ts
+│   │   ├── BossFightSystem.ts
+│   │   ├── InteractableSystem.ts
+│   │   ├── DifficultySystem.ts
+│   │   ├── SaveSystem.ts
+│   │   ├── FeedbackSystem.ts
+│   │   ├── MovementSystem.ts
+│   │   ├── MapLoader.ts
+│   │   └── StorySystem.ts              ← v2 new
+│   ├── lib/                            ← Utilities and services
 │   │   ├── EventBus.ts
 │   │   ├── ApiClient.ts
-│   │   └── validateUsername.ts
-│   │
-│   ├── data/                 ← Datos estáticos (bundleados con el cliente)
-│   │   ├── puzzles.ts        ← PUZZLE_POOL: Record<PuzzleCategory, Puzzle[]>
-│   │   └── items.ts          ← ITEM_DEFINITIONS: Item[]
-│   │
+│   │   ├── LocalStorageService.ts
+│   │   ├── Colors.ts
+│   │   ├── SceneTransition.ts
+│   │   ├── AudioManager.ts
+│   │   ├── SynthAudio.ts
+│   │   ├── SpriteGenerator.ts
+│   │   ├── ProceduralMap.ts
+│   │   ├── TilemapHelper.ts
+│   │   ├── validateUsername.ts
+│   │   └── i18n.ts                     ← v2 new
+│   ├── entities/
+│   │   ├── Hero.ts
+│   │   └── InteractionIndicator.ts
+│   ├── data/
+│   │   ├── puzzles.ts
+│   │   ├── fragments.ts
+│   │   ├── levels.ts
+│   │   ├── stories.ts                  ← v2 new
+│   │   └── translations.ts             ← v2 new
 │   └── types/
-│       └── index.ts          ← Todos los interfaces TypeScript compartidos
+│       └── index.ts
 │
-├── lambda/                   ← Funciones Lambda (Node.js 20.x + TypeScript)
-│   ├── submitScore.ts        ← POST /scores
-│   ├── getLeaderboard.ts     ← GET /scores
-│   └── getOrCreatePlayer.ts  ← POST /players
+├── lambda/
+│   ├── submitScore.ts
+│   ├── getLeaderboard.ts
+│   ├── getOrCreatePlayer.ts
+│   └── generateStory.ts                ← v2 new (Bedrock)
 │
-├── public/                   ← Assets estáticos (sprites, sonidos, fuentes)
-│   ├── assets/
-│   │   ├── sprites/
-│   │   ├── sounds/
-│   │   └── fonts/
-│   └── index.html
+├── infra/
+│   ├── DEPLOY-GUIDE.md
+│   ├── cloudformation/backend.yml
+│   └── scripts/
+│       ├── deploy.ps1
+│       └── destroy.ps1
 │
-├── dist/                     ← Output de build (gitignored, generado por Vite)
+├── public/
+│   ├── index.html
+│   └── assets/
+│       ├── sprites/
+│       ├── tilesets/puny-dungeon.png   ← CC0
+│       ├── sounds/
+│       └── fonts/
 │
-├── amplify.yml               ← Build spec para AWS Amplify CI/CD
-├── customHttp.yml            ← Reglas HTTP para Amplify (redirect HTTP→HTTPS)
+├── docs/
+│   └── VIDEO-SCRIPT.md
+│
+├── .eslintrc.json                      ← v2 new
+├── .prettierrc                         ← v2 new
+├── .editorconfig                       ← v2 new
+├── .kiroignore                         ← v2 new
+├── .env.example
+├── .gitignore
+├── amplify.yml
+├── customHttp.yml
 ├── vite.config.ts
 ├── vitest.config.ts
 ├── tsconfig.json
@@ -74,104 +121,124 @@ proyecto-kiro-hackaton/
 
 ---
 
-## Responsabilidades por Directorio
+## Directory Responsibilities
 
 ### `src/scenes/`
-- Contiene las 7 escenas del juego
-- Cada archivo = una clase que extiende `Phaser.Scene`
-- **Solo** lógica de presentación y manejo de input de usuario
-- Delegan lógica de dominio a `src/systems/` y comunicación a `EventBus`
-- **No** contienen lógica de negocio directamente
+- 10 game scenes (v2)
+- Each file is one class extending `Phaser.Scene`
+- Only presentation logic and input handling
+- Delegates domain logic to `src/systems/` and cross-scene communication to `EventBus`
+- No business logic in scenes — all rules live in `systems/`
+- All user-facing text uses `t()` from `lib/i18n.ts`
 
 ### `src/systems/`
-- Contiene los 4 sistemas de lógica del juego
-- **Independientes de Phaser** — pueden testearse sin DOM/canvas
-- Reciben y retornan tipos definidos en `src/types/index.ts`
-- Son instanciados por `GameScene` y almacenados en `game.registry`
+- Pure logic systems, Phaser-independent
+- Take and return types defined in `src/types/index.ts`
+- Instantiated by scenes or accessed as function modules
 
 ### `src/lib/`
-- Utilidades sin estado o con estado mínimo
-- `EventBus.ts`: singleton exportado como instancia, no como clase
-- `ApiClient.ts`: módulo con funciones exportadas (no clase)
-- `validateUsername.ts`: función pura exportada
+- Stateless or minimal-state utilities
+- `EventBus.ts`: singleton exported as instance
+- `ApiClient.ts`: module with exported functions
+- `i18n.ts`: `t(key, params?)` + `setLocale(locale)` + `getLocale()`
 
 ### `src/data/`
-- **Solo datos estáticos** — no lógica
-- Se importan directamente en los sistemas que los necesitan
-- `puzzles.ts`: `PUZZLE_POOL` (Record), mínimo 5 puzzles por categoría
-- `items.ts`: `ITEM_DEFINITIONS` (array), exactamente 6 ítems
+- Static data only, no logic
+- `puzzles.ts`: minimum 5 puzzles per category
+- `fragments.ts`: 5-6 pipeline fragments per level
+- `levels.ts`: exactly 5 level definitions
+- `stories.ts`: minimum 30 pre-generated narratives (intro + post-boss)
+- `translations.ts`: all UI strings for EN + ES
+
+### `src/entities/`
+- Phaser-specific game objects with visual state
 
 ### `src/types/`
-- Un solo archivo `index.ts` con **todos** los tipos e interfaces compartidos
-- No exporta clases ni lógica, solo tipos
-- Es el contrato entre sistemas, escenas y la API
+- Single `index.ts` with all shared types
+- Interfaces and type aliases only
 
 ### `lambda/`
-- Funciones Lambda independientes, compiladas con `tsc` antes del deploy
-- Cada función maneja un endpoint REST
-- Usan `@aws-sdk/client-dynamodb` — mockeado en tests con `vi.mock`
-- No comparten código entre sí directamente (evitar dependencias cruzadas)
+- Independent handlers, compiled with `tsc` before deploy
+- Use `@aws-sdk/*` from Node.js 20.x runtime — no bundling needed
 
 ### `public/assets/`
-- Assets estáticos servidos directamente por Vite/Amplify
-- Sprites, sonidos (alerta de timer ≤1s), fuentes
-- Optimizados para web (PNG para sprites, MP3/OGG para sonidos)
+- Sprites (PNG), sounds (MP3), fonts (WOFF2)
+
+### `.kiro/`
+- Spec-Driven Development artifacts
+- Never delete `_archive/` — preserves historical evidence
+- Steering files are the source of truth
 
 ---
 
-## Convenciones de Nombres de Archivos
+## File Naming Conventions
 
-| Patrón | Uso |
+| Pattern | Usage |
 |---|---|
-| `PascalCase.ts` | Clases (escenas, sistemas) |
-| `camelCase.ts` | Utilidades y módulos (lib/, data/) |
-| `*.test.ts` | Tests unitarios y de propiedad |
-| `index.ts` | Barrel exports (solo en `types/`) |
-| `SCREAMING_SNAKE_CASE` | Constantes exportadas (`EVENTS`, `PUZZLE_POOL`, `ITEM_DEFINITIONS`) |
+| `PascalCase.ts` | Classes (scenes, systems that are classes, entities) |
+| `camelCase.ts` | Function modules, utilities |
+| `*.test.ts` | Unit and property-based tests |
+| `index.ts` | Barrel exports (only in `types/`) |
+| `SCREAMING_SNAKE_CASE` | Exported constants (EVENTS, PUZZLE_POOL, FRAGMENT_POOL, LEVEL_DEFINITIONS, STORY_POOL, TRANSLATIONS, COLORS, COLORS_HEX, TEXT_STYLES) |
 
 ---
 
-## Flujo de Estado del Juego
+## Game State Flow
 
 ```
 game.registry
-  ├── 'playerProfile'   → PlayerProfile (username, personalBest)
-  ├── 'runState'        → RunState (score, HP, level, items, puzzle...)
+  ├── 'playerProfile'   → PlayerProfile (username, personalBest, updatedAt)
+  ├── 'locale'          → 'en' | 'es'  (also persisted in localStorage)
   └── 'tutorialDone'    → boolean
 
-RunState (en memoria, no persistido)
-  ├── Creado al iniciar un Run (LevelGenerator.generate())
-  ├── Actualizado durante el juego (GameScene)
-  └── Destruido al finalizar el Run (GameOver / Victory)
-      └── Solo el Score final se persiste en DynamoDB
+localStorage
+  ├── cq-profile-{username}       → PlayerProfile
+  ├── cq-leaderboard              → LeaderboardEntry[] (max 10, one per username)
+  ├── cq-audio-settings           → { muted, volume }
+  ├── cq-locale                   → 'en' | 'es'
+  ├── cq-tutorial-done            → boolean
+  └── cq-save-{mode}-{slot}       → SaveData
 ```
+
+Run state (score, HP, level) is passed via `scene.start('SceneName', { level, difficulty, hp, score })` between scenes. Only score gets written to DynamoDB at end of run.
 
 ---
 
-## Flujo de Escenas
+## Scene Flow (v2)
 
 ```
 LoginScene
-  └── (username válido + DynamoDB OK)
+  └── (valid username)
         └── MainMenuScene
-              ├── (primer run, sin rooms completadas) → TutorialScene → GameScene
-              └── (jugador recurrente)                → GameScene
-                    ├── (HP = 0) → GameOverScene
-                    │     ├── "New Run"         → GameScene
-                    │     └── "View Leaderboard" → LeaderboardScene → MainMenuScene
-                    └── (Level final completado) → VictoryScene
-                          ├── "New Run"         → GameScene
-                          └── "View Leaderboard" → LeaderboardScene → MainMenuScene
+              ├── (first run, tutorialDone=false) → TutorialScene → ExplorationScene
+              ├── (returning player)               → ExplorationScene
+              ├── (continue save)                  → ExplorationScene (from save)
+              └── (Leaderboard)                    → LeaderboardScene → MainMenuScene
+
+  ExplorationScene (level N)
+    ├── (parallel) HUDScene
+    ├── (E key on terminal, parallel) PuzzleScene
+    │     └── back to ExplorationScene
+    ├── (all fragments + door)
+    │     └── BossFightScene (dispatcher: Type A/B/C)
+    │           ├── L1, L4: Type A (Pipeline Assembly)
+    │           ├── L2, L5: Type B (JRPG Action Menu)
+    │           ├── L3:     Type C (Rush Mode)
+    │           ├── (victory) → next level OR VictoryScene (if L5)
+    │           └── (defeat)  → GameOverScene
+    ├── (HP = 0) → GameOverScene
+    └── (ESC) → confirm → MainMenuScene
 ```
 
 ---
 
 ## API Endpoints
 
-| Método | Ruta | Descripción | Lambda |
+| Method | Path | Description | Lambda |
 |---|---|---|---|
-| `POST` | `/players` | Crear o recuperar perfil del jugador | `getOrCreatePlayer.ts` |
-| `POST` | `/scores` | Guardar resultado de un Run | `submitScore.ts` |
-| `GET` | `/scores` | Obtener top 10 del Leaderboard | `getLeaderboard.ts` |
+| `POST` | `/players` | Create or retrieve player profile | `getOrCreatePlayer.ts` |
+| `POST` | `/scores` | Submit run score | `submitScore.ts` |
+| `GET` | `/scores` | Fetch top-10 leaderboard | `getLeaderboard.ts` |
+| `POST` | `/stories` | (v2, optional) Generate story via Bedrock | `generateStory.ts` |
 
-Base URL configurada en `VITE_API_BASE_URL` (variable de entorno de Amplify).
+Base URL: `VITE_API_BASE_URL` (Amplify environment variable).

@@ -1,6 +1,9 @@
 /**
- * Shared TypeScript types and interfaces for Cloud Quest: DevOps Dungeon.
+ * Shared TypeScript types and interfaces for Cloud Quest: DevOps Dungeon (v2).
  * This file is the contract between all systems, scenes, and the API.
+ *
+ * Legacy types removed in v2: Room, Level, LevelSequence, Item, HeroItemSlots,
+ * ItemType, RunState. The v2 flow passes run state directly via scene.start data.
  */
 
 // ─── Puzzle Types ────────────────────────────────────────────────────────────
@@ -14,69 +17,6 @@ export interface Puzzle {
   correctAnswer: string;
   hints: [string, ...string[]]; // 1–3 hints, min 1 enforced by tuple
   difficulty: number;           // 1–3
-}
-
-// ─── Level & Room Types ──────────────────────────────────────────────────────
-
-export interface Room {
-  id: string;
-  type: 'combat' | 'rest' | 'item';
-  connections: string[];        // IDs of connected rooms
-  bugId?: string;               // present only in combat rooms
-  isEntrance: boolean;
-  isExit: boolean;
-}
-
-export interface Level {
-  levelNumber: number;
-  rooms: Room[];
-  bugBaseHP: number;            // = BASE_HP * (1 + 0.10 * (levelNumber - 1))
-  puzzleStepCount: number;      // = BASE_STEPS + floor((levelNumber - 1) / 2)
-}
-
-export interface LevelSequence {
-  levels: Level[];              // length in [5, 10]
-  seed: number;
-}
-
-// ─── Item Types ──────────────────────────────────────────────────────────────
-
-export type ItemType =
-  | 'Timer_Extension'
-  | 'HP_Recovery'
-  | 'Hint_Revealer'
-  | 'Score_Multiplier'
-  | 'Bug_Weakener'
-  | 'Second_Chance';
-
-export interface Item {
-  id: string;
-  type: ItemType;
-  description: string;
-}
-
-export interface HeroItemSlots {
-  active: Item[]; // max 3 items
-}
-
-// ─── Run State ───────────────────────────────────────────────────────────────
-
-export interface RunState {
-  sessionId: string;
-  username: string;
-  currentScore: number;
-  currentLevel: number;
-  highestLevelReached: number;
-  heroHP: number;                         // 0–100
-  activeItems: Item[];                    // max 3
-  levelSequence: LevelSequence;
-  currentRoom: Room | null;
-  currentPuzzle: Puzzle | null;
-  timerSeconds: number;
-  hintsShown: number;
-  totalPuzzlesSolved: number;
-  totalBugsDefeated: number;
-  scoreMultiplierRoomsRemaining: number;  // 0 = inactive
 }
 
 // ─── Player & Leaderboard Types ──────────────────────────────────────────────
@@ -106,7 +46,7 @@ export interface ScoreEvent {
   levelNumber: number;
   remainingSeconds: number;
   bugDifficulty: number;
-  hasScoreMultiplier: boolean;
+  hasScoreMultiplier: boolean;  // legacy; kept for ScoreSystem backward compat
 }
 
 export interface RunResult {
@@ -128,6 +68,7 @@ export interface GameOverData {
 
 export interface VictoryData {
   score: number;
+  levelReached: number;
   bugsDefeated: number;
   puzzlesSolved: number;
 }
@@ -182,3 +123,30 @@ export interface FragmentProgress {
 // ─── Difficulty Types ────────────────────────────────────────────────────────
 
 export type DifficultyMode = 'beginner' | 'normal' | 'hard';
+
+// ─── Localization Types (v2) ─────────────────────────────────────────────────
+
+export type Locale = 'en' | 'es';
+
+// ─── Hero Variants (v2) ──────────────────────────────────────────────────────
+
+export type HeroVariant = 'classic' | 'devops' | 'cyberpunk';
+
+/** Map difficulty to hero variant (used in ExplorationScene and MainMenuScene) */
+export const HERO_VARIANT_BY_DIFFICULTY: Record<DifficultyMode, HeroVariant> = {
+  beginner: 'classic',
+  normal: 'devops',
+  hard: 'cyberpunk',
+};
+
+// ─── Story Types (v2) ────────────────────────────────────────────────────────
+
+export interface Story {
+  id: string;
+  levelId: string;
+  type: 'intro' | 'outro';
+  locale: Locale;
+  text: string;
+  learnedConcepts?: string[];    // for outros only
+  realWorldExample?: string;     // for outros only
+}

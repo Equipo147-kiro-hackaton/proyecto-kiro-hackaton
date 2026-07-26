@@ -111,7 +111,12 @@ export class BossFightScene extends Phaser.Scene {
     this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2, 'BOSS DEFEATED!', { fontSize: '20px', fontFamily: 'monospace', color: '#44ff44', fontStyle: 'bold' }).setOrigin(0.5);
     this.time.delayedCall(2000, () => {
       if (this.sceneData.currentLevel >= getTotalLevels()) {
-        this.scene.start('VictoryScene', { score: this.sceneData.score, bugsDefeated: this.sceneData.currentLevel, puzzlesSolved: this.fragments.length });
+        this.scene.start('VictoryScene', {
+          score: this.sceneData.score,
+          levelReached: this.sceneData.currentLevel,
+          bugsDefeated: this.sceneData.currentLevel,
+          puzzlesSolved: this.fragments.length,
+        });
       } else {
         this.scene.start('ExplorationScene', { level: this.sceneData.currentLevel + 1, difficulty: this.sceneData.difficulty, hp: this.state.heroHearts * 25, score: this.sceneData.score + 200 });
       }

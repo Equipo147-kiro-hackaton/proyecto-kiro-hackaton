@@ -137,6 +137,6 @@ export class TutorialScene extends Phaser.Scene {
 
   private onComplete(): void {
     this.game.registry.set('tutorialDone', true);
-    this.scene.start('GameScene');
+    this.scene.start('ExplorationScene', { level: 1, difficulty: 'beginner', hp: 100, score: 0 });
   }
 }

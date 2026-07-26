@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { getLeaderboard } from '@/lib/ApiClient';
+import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import type { LeaderboardEntry } from '@/types';
 
 /**
@@ -19,6 +20,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
   create(): void {
     this.contentContainer = this.add.container(0, 0);
+    fadeIn(this);
 
     // Title
     this.add.text(480, 40, 'LEADERBOARD', {
@@ -45,7 +47,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
     backBtn.on('pointerover', () => backBtn.setColor('#99ddff'));
     backBtn.on('pointerout', () => backBtn.setColor('#66ccff'));
-    backBtn.on('pointerdown', () => this.scene.start('MainMenuScene'));
+    backBtn.on('pointerdown', () => fadeToScene(this, 'MainMenuScene'));
 
     this.loadLeaderboard();
   }
@@ -59,11 +61,36 @@ export class LeaderboardScene extends Phaser.Scene {
     try {
       const entries = await getLeaderboard();
       this.loadingText.setVisible(false);
-      this.renderEntries(entries);
+      if (entries.length === 0) {
+        this.showEmptyState();
+      } else {
+        this.renderEntries(entries);
+      }
     } catch {
       this.loadingText.setVisible(false);
       this.showError();
     }
+  }
+
+  /**
+   * Show a friendly empty state when no scores exist yet.
+   */
+  private showEmptyState(): void {
+    this.contentContainer.removeAll(true);
+
+    const emptyText = this.add.text(480, 220, 'No scores yet!', {
+      fontSize: '20px',
+      fontFamily: 'monospace',
+      color: '#ffcc00',
+    }).setOrigin(0.5);
+
+    const hintText = this.add.text(480, 260, 'Play a run to be the first on the leaderboard.', {
+      fontSize: '14px',
+      fontFamily: 'monospace',
+      color: '#888888',
+    }).setOrigin(0.5);
+
+    this.contentContainer.add([emptyText, hintText]);
   }
 
   /**

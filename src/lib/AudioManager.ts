@@ -1,8 +1,10 @@
 /**
  * AudioManager — Centralized audio control for the game.
  * Manages SFX playback, mute state, and volume.
- * Integrates with Phaser's sound system.
+ * Integrates with Phaser's sound system and SynthAudio fallback.
  */
+
+import { playSynth, setSynthVolume } from '@/lib/SynthAudio';
 
 export type SoundKey =
   | 'sfx-step'
@@ -71,7 +73,8 @@ export function getSoundAssets(): Array<{ key: SoundKey; path: string }> {
 }
 
 /**
- * Play a sound effect. Respects mute and volume. Fails silently if sound not loaded.
+ * Play a sound effect. Respects mute and volume.
+ * Tries Phaser sound system first; falls back to SynthAudio (Web Audio API).
  */
 export function playSFX(
   scene: { sound: { play: (key: string, config?: object) => void; get: (key: string) => unknown } },
@@ -80,11 +83,17 @@ export function playSFX(
   const settings = getAudioSettings();
   if (settings.muted) return;
 
+  // Try Phaser's sound system first (if .mp3 files are loaded)
   try {
     if (scene.sound.get(key)) {
       scene.sound.play(key, { volume: settings.volume });
+      return;
     }
   } catch {
-    // Silent fail — audio files are optional
+    // Fall through to synth
   }
+
+  // Fallback: use procedural synth audio (no external files needed)
+  setSynthVolume(settings.volume);
+  playSynth(key);
 }

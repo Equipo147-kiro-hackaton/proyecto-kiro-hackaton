@@ -2,14 +2,25 @@
   "version": "v1",
   "hooks": [
     {
-      "name": "Lint TypeScript on save",
+      "name": "TypeScript check on save",
       "trigger": "PostFileSave",
       "description": "Runs TypeScript compiler check after any TS file is saved to catch type errors immediately.",
       "matcher": "\\.(ts|tsx)$",
       "action": {
         "type": "command",
-        "command": "npx tsc --noEmit --pretty 2>&1 | head -50",
+        "command": "npx tsc --noEmit --pretty 2>&1 | Select-Object -First 30",
         "timeout": 30
+      }
+    },
+    {
+      "name": "ESLint on save",
+      "trigger": "PostFileSave",
+      "description": "Runs ESLint on the saved TypeScript file to catch code smells (unused imports, no-any, etc.).",
+      "matcher": "^(src|lambda)/.*\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "npx eslint --no-error-on-unmatched-pattern --max-warnings=0 2>&1 | Select-Object -First 20",
+        "timeout": 20
       }
     }
   ]

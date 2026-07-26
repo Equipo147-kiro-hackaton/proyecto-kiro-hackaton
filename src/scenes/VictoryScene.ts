@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { ScoreSystem } from '@/systems/ScoreSystem';
+import { submitScore as submitScoreLocal, updatePersonalBest } from '@/lib/LocalStorageService';
+import { fadeIn, fadeToScene } from '@/lib/SceneTransition';
 import type { VictoryData, RunResult } from '@/types';
 
 /**
@@ -23,6 +25,7 @@ export class VictoryScene extends Phaser.Scene {
 
   create(): void {
     this.scoreSystem = new ScoreSystem();
+    fadeIn(this);
 
     this.displayResults();
     this.createButtons();
@@ -104,12 +107,11 @@ export class VictoryScene extends Phaser.Scene {
   }
 
   /**
-   * Start a new run: reset RunState (HP=100, items=[], score=0, level=1),
-   * preserve username, generate new levels, transition to GameScene.
+   * Start a new run: return to MainMenu for difficulty selection.
    * Requirement: 8.5
    */
   private startNewRun(): void {
-    this.scene.start('GameScene');
+    fadeToScene(this, 'MainMenuScene');
   }
 
   /**
@@ -117,23 +119,28 @@ export class VictoryScene extends Phaser.Scene {
    * Requirement: 8.6
    */
   private viewLeaderboard(): void {
-    this.scene.start('LeaderboardScene');
+    fadeToScene(this, 'LeaderboardScene');
   }
 
   /**
-   * Submit the run score to the backend via ScoreSystem.
+   * Submit the run score to the backend via ScoreSystem and save locally.
    * Requirement: 5.3
    */
   private submitScoreToBackend(): void {
+    const username = this.game.registry.get('playerProfile')?.username ?? 'anonymous';
+
+    // Always save to localStorage (offline-first)
+    submitScoreLocal(username, this.victoryData.score);
+    updatePersonalBest(username, this.victoryData.score);
+
+    // Also attempt API submission (fire and forget)
     const result: RunResult = {
-      username: this.game.registry.get('playerProfile')?.username ?? 'anonymous',
+      username,
       score: this.victoryData.score,
-      highestLevel: this.game.registry.get('runState')?.highestLevelReached ?? 10,
+      highestLevel: this.victoryData.levelReached,
       totalPuzzlesSolved: this.victoryData.puzzlesSolved,
       totalBugsDefeated: this.victoryData.bugsDefeated,
     };
-
-    // Fire and forget — ScoreSystem handles retry logic internally
     this.scoreSystem.submitScore(result);
   }
 }
