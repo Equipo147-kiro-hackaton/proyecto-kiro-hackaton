@@ -20,34 +20,34 @@ import type { SoundKey } from '@/lib/AudioManager';
  */
 const SFX_PRESETS: Record<SoundKey, (number | undefined)[]> = {
   // Soft footstep click
-  'sfx-step': [0.2, 0, 200, , 0.01, 0.01, 4, 0.5, , , , , , , , , , 0.5, 0.01],
+  'sfx-step': [0.2, 0, 200, undefined, 0.01, 0.01, 4, 0.5, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, 0.5, 0.01],
 
   // UI interaction blip (friendly beep)
-  'sfx-interact': [0.4, 0, 880, 0.01, 0.05, 0.1, 1, 1.5, , , 200, 0.03, , , , , , 0.7, 0.02],
+  'sfx-interact': [0.4, 0, 880, 0.01, 0.05, 0.1, 1, 1.5, undefined, undefined, 200, 0.03, undefined, undefined, undefined, undefined, undefined, 0.7, 0.02],
 
   // Correct answer — ascending triumphant jingle
-  'sfx-correct': [0.5, 0, 587, 0.02, 0.15, 0.3, 1, 0.5, , , 400, 0.05, 0.05, , , , , 0.8, 0.1],
+  'sfx-correct': [0.5, 0, 587, 0.02, 0.15, 0.3, 1, 0.5, undefined, undefined, 400, 0.05, 0.05, undefined, undefined, undefined, undefined, 0.8, 0.1],
 
   // Incorrect answer — descending buzz
-  'sfx-incorrect': [0.4, 0, 200, 0.01, 0.1, 0.2, 3, 2, , , -100, 0.05, , , , 0.5, , 0.6, 0.05],
+  'sfx-incorrect': [0.4, 0, 200, 0.01, 0.1, 0.2, 3, 2, undefined, undefined, -100, 0.05, undefined, undefined, undefined, 0.5, undefined, 0.6, 0.05],
 
   // Fragment collected — magical tinkle
-  'sfx-fragment': [0.5, 0, 1200, 0.01, 0.08, 0.2, 1, 1, , , 300, 0.02, 0.04, , , , , 0.8, 0.05],
+  'sfx-fragment': [0.5, 0, 1200, 0.01, 0.08, 0.2, 1, 1, undefined, undefined, 300, 0.02, 0.04, undefined, undefined, undefined, undefined, 0.8, 0.05],
 
   // Boss hit — heavy impact thud
-  'sfx-boss-hit': [0.6, 0, 150, 0.01, 0.05, 0.15, 4, 3, , , , , , 0.5, , 0.3, , 0.9, 0.02],
+  'sfx-boss-hit': [0.6, 0, 150, 0.01, 0.05, 0.15, 4, 3, undefined, undefined, undefined, undefined, undefined, 0.5, undefined, 0.3, undefined, 0.9, 0.02],
 
   // Boss attack — aggressive slash
-  'sfx-boss-attack': [0.5, 0, 300, 0.01, 0.03, 0.1, 4, 2, -20, , , , , 0.8, , , , 0.7, 0.03],
+  'sfx-boss-attack': [0.5, 0, 300, 0.01, 0.03, 0.1, 4, 2, -20, undefined, undefined, undefined, undefined, 0.8, undefined, undefined, undefined, 0.7, 0.03],
 
   // Victory — celebratory fanfare
-  'sfx-victory': [0.6, 0, 523, 0.02, 0.2, 0.4, 1, 0.5, , , 200, 0.08, 0.08, , , , , 0.9, 0.15],
+  'sfx-victory': [0.6, 0, 523, 0.02, 0.2, 0.4, 1, 0.5, undefined, undefined, 200, 0.08, 0.08, undefined, undefined, undefined, undefined, 0.9, 0.15],
 
   // Damage taken — painful hit
-  'sfx-damage': [0.5, 0, 100, 0.01, 0.05, 0.1, 4, 3, , , -50, 0.02, , 0.3, , 0.5, , 0.7, 0.02],
+  'sfx-damage': [0.5, 0, 100, 0.01, 0.05, 0.1, 4, 3, undefined, undefined, -50, 0.02, undefined, 0.3, undefined, 0.5, undefined, 0.7, 0.02],
 
   // Door open — metallic creak
-  'sfx-door': [0.3, 0, 400, 0.02, 0.1, 0.2, 2, 1, 10, , 100, 0.05, 0.02, , , , , 0.6, 0.08],
+  'sfx-door': [0.3, 0, 400, 0.02, 0.1, 0.2, 2, 1, 10, undefined, 100, 0.05, 0.02, undefined, undefined, undefined, undefined, 0.6, 0.08],
 };
 
 /** Current volume multiplier (set by AudioManager) */

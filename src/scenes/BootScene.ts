@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { COLORS_HEX } from '@/lib/Colors';
 import { t } from '@/lib/i18n';
+import { MUSIC_ASSETS, initMusicManager } from '@/lib/MusicManager';
 
 /**
  * BootScene — Loading screen shown while assets preload.
@@ -103,9 +104,19 @@ export class BootScene extends Phaser.Scene {
         this.load.audio(sfx.key, sfx.path);
       }
     }
+
+    // Load music tracks (Kenney CC0 8-Bit jingles)
+    for (const music of MUSIC_ASSETS) {
+      if (!this.cache.audio.exists(music.key)) {
+        this.load.audio(music.key, music.path);
+      }
+    }
   }
 
   create(): void {
+    // Initialize music manager with game reference
+    initMusicManager(this.game);
+
     // Brief pause for visual effect, then go to login
     this.time.delayedCall(400, () => {
       this.scene.start('LoginScene');

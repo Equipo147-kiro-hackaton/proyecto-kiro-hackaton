@@ -1,59 +1,49 @@
 /**
- * MusicManager — Procedural ambient music using Web Audio API.
+ * MusicManager — Background music using Kenney CC0 8-Bit jingles.
  *
- * Generates different ambient soundscapes per scenario type:
- * - 'menu': calm pad with slow LFO
- * - 'office': lo-fi ambient with subtle rhythmic pulse
- * - 'server': electronic hum with data-like arpeggios
- * - 'cloud': ethereal pad with reverb feel
- * - 'boss': intense low drone with fast pulse
- *
+ * Plays looping .ogg tracks via Phaser's audio system.
  * Supports crossfade between tracks, volume control, and mute.
- * Uses AudioManager settings for volume/mute state.
+ * Falls back to silence if audio files aren't loaded.
+ *
+ * Tracks:
+ * - 'menu': calm 8-bit jingle for menu screens
+ * - 'exploration': adventurous loop for dungeon exploration (covers office/server/cloud)
+ * - 'boss': intense loop for boss fights
+ * - 'victory': celebratory jingle for victory
  */
 
+import Phaser from 'phaser';
 import { getAudioSettings } from '@/lib/AudioManager';
 
 export type MusicTrack = 'menu' | 'office' | 'server' | 'cloud' | 'boss' | 'victory';
 
-interface TrackConfig {
-  baseFreq: number;
-  waveform: OscillatorType;
-  lfoRate: number;
-  lfoDepth: number;
-  filterFreq: number;
-  gain: number;
-}
-
-const TRACK_CONFIGS: Record<MusicTrack, TrackConfig> = {
-  menu: { baseFreq: 220, waveform: 'sine', lfoRate: 0.3, lfoDepth: 10, filterFreq: 800, gain: 0.12 },
-  office: { baseFreq: 165, waveform: 'triangle', lfoRate: 0.5, lfoDepth: 5, filterFreq: 600, gain: 0.10 },
-  server: { baseFreq: 110, waveform: 'sawtooth', lfoRate: 2.0, lfoDepth: 15, filterFreq: 400, gain: 0.08 },
-  cloud: { baseFreq: 330, waveform: 'sine', lfoRate: 0.2, lfoDepth: 20, filterFreq: 1200, gain: 0.10 },
-  boss: { baseFreq: 82, waveform: 'square', lfoRate: 4.0, lfoDepth: 8, filterFreq: 300, gain: 0.14 },
-  victory: { baseFreq: 440, waveform: 'sine', lfoRate: 0.4, lfoDepth: 12, filterFreq: 2000, gain: 0.12 },
+/** Maps game track names to audio file keys */
+const TRACK_TO_KEY: Record<MusicTrack, string> = {
+  menu: 'music-menu',
+  office: 'music-exploration',
+  server: 'music-exploration',
+  cloud: 'music-exploration',
+  boss: 'music-boss',
+  victory: 'music-victory',
 };
 
-let audioContext: AudioContext | null = null;
-let currentOscillator: OscillatorNode | null = null;
-let currentLFO: OscillatorNode | null = null;
-let currentGainNode: GainNode | null = null;
-let _currentFilterNode: BiquadFilterNode | null = null;
-let currentTrack: MusicTrack | null = null;
-let isStopping = false;
+/** Audio keys to preload */
+export const MUSIC_ASSETS = [
+  { key: 'music-menu', path: 'assets/sounds/music-menu.ogg' },
+  { key: 'music-exploration', path: 'assets/sounds/music-exploration.ogg' },
+  { key: 'music-boss', path: 'assets/sounds/music-boss.ogg' },
+  { key: 'music-victory', path: 'assets/sounds/music-victory.ogg' },
+];
 
-function getContext(): AudioContext | null {
-  if (!audioContext) {
-    try {
-      audioContext = new AudioContext();
-    } catch {
-      return null;
-    }
-  }
-  if (audioContext.state === 'suspended') {
-    audioContext.resume().catch(() => { /* ignore */ });
-  }
-  return audioContext;
+let currentSound: Phaser.Sound.BaseSound | null = null;
+let currentTrack: MusicTrack | null = null;
+let gameInstance: Phaser.Game | null = null;
+
+/**
+ * Initialize with a reference to the Phaser game (called once from BootScene).
+ */
+export function initMusicManager(game: Phaser.Game): void {
+  gameInstance = game;
 }
 
 /**
@@ -63,60 +53,62 @@ function getContext(): AudioContext | null {
 export function playMusic(track: MusicTrack): void {
   const settings = getAudioSettings();
   if (settings.muted) {
-    currentTrack = track; // Remember for when unmuted
+    currentTrack = track;
     return;
   }
 
-  if (currentTrack === track && currentOscillator && !isStopping) return;
+  const audioKey = TRACK_TO_KEY[track];
+  const currentKey = currentTrack ? TRACK_TO_KEY[currentTrack] : null;
 
-  if (currentOscillator) {
-    crossfadeTo(track);
+  // Same audio file already playing
+  if (currentKey === audioKey && currentSound?.isPlaying) return;
+
+  // Stop current
+  stopMusic();
+
+  // Play new track
+  if (gameInstance?.sound) {
+    try {
+      currentSound = gameInstance.sound.add(audioKey, {
+        loop: true,
+        volume: settings.volume * 0.4, // Music at 40% of master to not overpower SFX
+      });
+      currentSound.play();
+      currentTrack = track;
+    } catch {
+      // Audio not loaded — silent fallback
+      currentTrack = track;
+    }
   } else {
-    startTrack(track);
+    currentTrack = track;
   }
 }
 
 /**
- * Stop all music with a fade-out.
+ * Stop all music.
  */
 export function stopMusic(): void {
-  if (!currentGainNode || !currentOscillator) return;
-
-  isStopping = true;
-  const ctx = getContext();
-  if (!ctx) return;
-
-  const now = ctx.currentTime;
-  currentGainNode.gain.setValueAtTime(currentGainNode.gain.value, now);
-  currentGainNode.gain.linearRampToValueAtTime(0, now + 0.5);
-
-  const osc = currentOscillator;
-  const lfo = currentLFO;
-  setTimeout(() => {
-    try { osc.stop(); } catch { /* ignore */ }
-    try { lfo?.stop(); } catch { /* ignore */ }
-  }, 600);
-
-  currentOscillator = null;
-  currentLFO = null;
-  currentGainNode = null;
-  _currentFilterNode = null;
-  currentTrack = null;
-  isStopping = false;
+  if (currentSound) {
+    try {
+      currentSound.stop();
+      currentSound.destroy();
+    } catch { /* ignore */ }
+    currentSound = null;
+  }
 }
 
 /**
  * Update music volume (called when settings change).
  */
 export function updateMusicVolume(): void {
-  if (!currentGainNode || !currentTrack) return;
+  if (!currentSound) return;
   const settings = getAudioSettings();
-
   if (settings.muted) {
-    currentGainNode.gain.value = 0;
+    stopMusic();
   } else {
-    const config = TRACK_CONFIGS[currentTrack];
-    currentGainNode.gain.value = config.gain * settings.volume;
+    try {
+      (currentSound as Phaser.Sound.WebAudioSound).setVolume(settings.volume * 0.4);
+    } catch { /* ignore */ }
   }
 }
 
@@ -124,10 +116,8 @@ export function updateMusicVolume(): void {
  * Resume music after unmute (if a track was remembered).
  */
 export function resumeAfterUnmute(): void {
-  if (currentTrack && !currentOscillator) {
-    startTrack(currentTrack);
-  } else {
-    updateMusicVolume();
+  if (currentTrack && !currentSound?.isPlaying) {
+    playMusic(currentTrack);
   }
 }
 
@@ -136,90 +126,4 @@ export function resumeAfterUnmute(): void {
  */
 export function getCurrentTrack(): MusicTrack | null {
   return currentTrack;
-}
-
-// ─── Internal ─────────────────────────────────────────────────────────────────
-
-function startTrack(track: MusicTrack): void {
-  const ctx = getContext();
-  if (!ctx) return;
-
-  const config = TRACK_CONFIGS[track];
-  const settings = getAudioSettings();
-  const volume = settings.muted ? 0 : config.gain * settings.volume;
-
-  // Main oscillator
-  const osc = ctx.createOscillator();
-  osc.type = config.waveform;
-  osc.frequency.value = config.baseFreq;
-
-  // LFO for vibrato/tremolo
-  const lfo = ctx.createOscillator();
-  lfo.type = 'sine';
-  lfo.frequency.value = config.lfoRate;
-
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = config.lfoDepth;
-  lfo.connect(lfoGain);
-  lfoGain.connect(osc.frequency);
-
-  // Filter
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = config.filterFreq;
-  filter.Q.value = 1;
-
-  // Gain (volume)
-  const gainNode = ctx.createGain();
-  gainNode.gain.value = 0;
-
-  // Chain: osc → filter → gain → destination
-  osc.connect(filter);
-  filter.connect(gainNode);
-  gainNode.connect(ctx.destination);
-
-  osc.start();
-  lfo.start();
-
-  // Fade in
-  const now = ctx.currentTime;
-  gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(volume, now + 1.0);
-
-  currentOscillator = osc;
-  currentLFO = lfo;
-  currentGainNode = gainNode;
-  _currentFilterNode = filter;
-  currentTrack = track;
-  isStopping = false;
-}
-
-function crossfadeTo(track: MusicTrack): void {
-  const ctx = getContext();
-  if (!ctx || !currentGainNode) return;
-
-  // Fade out current
-  const now = ctx.currentTime;
-  currentGainNode.gain.setValueAtTime(currentGainNode.gain.value, now);
-  currentGainNode.gain.linearRampToValueAtTime(0, now + 0.8);
-
-  const oldOsc = currentOscillator;
-  const oldLfo = currentLFO;
-
-  // Stop old nodes after fade
-  setTimeout(() => {
-    try { oldOsc?.stop(); } catch { /* ignore */ }
-    try { oldLfo?.stop(); } catch { /* ignore */ }
-  }, 900);
-
-  // Clear references and start new track
-  currentOscillator = null;
-  currentLFO = null;
-  currentGainNode = null;
-  _currentFilterNode = null;
-
-  // Start new track after a brief overlap
-  setTimeout(() => {
-    startTrack(track);
-  }, 400);
 }
