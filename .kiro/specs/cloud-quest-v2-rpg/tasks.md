@@ -192,24 +192,24 @@ Legend: `[ ]` pending, `[~]` in progress, `[x]` done, `[*]` optional.
 ## Phase 5 — Polish
 
 ### 5.A Particles
-- [ ] 5.A.1 Additive-blend sparkles — R5.1
-- [ ] 5.A.2 Juicy damage numbers — R5.1
-- [ ] 5.A.3 Confetti burst — R5.1
+- [x] 5.A.1 Additive-blend sparkles — R5.1
+- [x] 5.A.2 Juicy damage numbers — R5.1
+- [x] 5.A.3 Confetti burst — R5.1
 
 ### 5.B Cinematic transitions
-- [ ] 5.B.1 Level fade + text reveal — R5.2
-- [ ] 5.B.2 Boss intro zoom + shake — R5.2
-- [ ] 5.B.3 Victory slow-motion — R5.2
+- [x] 5.B.1 Level fade + text reveal — R5.2
+- [x] 5.B.2 Boss intro zoom + shake — R5.2
+- [x] 5.B.3 Victory slow-motion — R5.2
 
 ### 5.C Final polish
-- [ ] 5.C.1 Loading screen with tip — R5.3
-- [ ] 5.C.2 F12 screenshot — R5.3
-- [ ] 5.C.3 Consistent easing — R5.3
+- [x] 5.C.1 Loading screen with tip — R5.3
+- [x] 5.C.2 F12 screenshot — R5.3
+- [x] 5.C.3 Consistent easing — R5.3
 
 ### 5.D Phase 5 acceptance
-- [ ] 5.D.1 3-min demo review
-- [ ] 5.D.2 Commit + tag `phase-5-complete`
-- [ ] 5.D.3 PR to main for hackathon
+- [x] 5.D.1 3-min demo review
+- [x] 5.D.2 Commit + tag `phase-5-complete`
+- [x] 5.D.3 PR to main for hackathon
 
 ---
 

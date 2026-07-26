@@ -4,7 +4,7 @@ import { FragmentSystem } from '@/systems/FragmentSystem';
 import { getDifficultyConfig } from '@/systems/DifficultySystem';
 import { getTotalLevels } from '@/systems/MapLoader';
 import { playSFX } from '@/lib/AudioManager';
-import { screenShake, screenFlash, floatingText, bossDamageFlash } from '@/systems/FeedbackSystem';
+import { screenShake, screenFlash, floatingText, bossDamageFlash, confettiBurst, bossIntroEffect, victorySlowMotion } from '@/systems/FeedbackSystem';
 import { generateBossSprite } from '@/lib/SpriteGenerator';
 import { playMusic } from '@/lib/MusicManager';
 import { t } from '@/lib/i18n';
@@ -52,6 +52,7 @@ export class BossFightScene extends Phaser.Scene {
     for (const f of this.fragments) this.fragmentSystem.collectFragment(f.id);
     this.shuffledFragments = [...this.fragments].sort(() => Math.random() - 0.5);
     this.buildUI();
+    bossIntroEffect(this);
     this.startBossTimer();
   }
 
@@ -207,6 +208,8 @@ export class BossFightScene extends Phaser.Scene {
 
   private onVictory(): void {
     playSFX(this, 'sfx-victory');
+    confettiBurst(this, this.cameras.main.width / 2, this.cameras.main.height / 2);
+    victorySlowMotion(this);
     // Boss death animation
     this.tweens.add({
       targets: this.bossSprite, alpha: 0, scaleX: 3, scaleY: 0.2,

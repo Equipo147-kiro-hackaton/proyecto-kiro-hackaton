@@ -18,7 +18,7 @@ import { getLevelDefinition, getBossSceneKey } from '@/data/levels';
 import { getDifficultyConfig, canSaveAtProgress, calculateProgress } from '@/systems/DifficultySystem';
 import { saveGame, createSaveData } from '@/systems/SaveSystem';
 import { playSFX, toggleMute } from '@/lib/AudioManager';
-import { screenShake, screenFlash, floatingText, sparkleEffect, doorGlowEffect } from '@/systems/FeedbackSystem';
+import { screenShake, screenFlash, floatingText, sparkleEffect, sparkleCollect, doorGlowEffect } from '@/systems/FeedbackSystem';
 import { COLORS_HEX } from '@/lib/Colors';
 import { EventBus } from '@/lib/EventBus';
 import { generateAllSprites } from '@/lib/SpriteGenerator';
@@ -548,6 +548,7 @@ export class ExplorationScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-E', () => this.handleInteraction());
     this.input.keyboard.on('keydown-ESC', () => { this.scene.stop('HUDScene'); this.scene.start('MainMenuScene'); });
     this.input.keyboard.on('keydown-M', () => { const muted = toggleMute(); if (muted) stopMusic(); else { const mc = getMapConfig(this.currentLevel); const scenarioToTrack: Record<string, MusicTrack> = { office: 'office', server: 'server', cloud: 'cloud' }; playMusic(scenarioToTrack[mc?.scenario ?? 'office'] ?? 'office'); } updateMusicVolume(); });
+    this.input.keyboard.on('keydown-F12', () => { this.game.renderer.snapshot((img: Phaser.Display.Color | HTMLImageElement) => { if (img instanceof HTMLImageElement) { const a = document.createElement('a'); a.href = img.src; a.download = `cloud-quest-${Date.now()}.png`; a.click(); } }); });
   }
 
   private handleMovementInput(): void {
@@ -669,7 +670,7 @@ export class ExplorationScene extends Phaser.Scene {
       playSFX(this, 'sfx-fragment');
       const px = interactable.tileX * this.map.tileWidth + this.map.tileWidth / 2;
       const py = interactable.tileY * this.map.tileHeight + this.map.tileHeight / 2;
-      sparkleEffect(this, px, py); floatingText(this, px, py - 8, `+${gain}`, '#ffdd44');
+      sparkleEffect(this, px, py); sparkleCollect(this, px, py); floatingText(this, px, py - 8, `+${gain}`, '#ffdd44');
       this.updateHUD(); this.checkCompletion(); this.tryAutoSave();
     };
 

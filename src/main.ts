@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { BootScene } from '@/scenes/BootScene';
 import { LoginScene } from '@/scenes/LoginScene';
 import { MainMenuScene } from '@/scenes/MainMenuScene';
 import { TutorialScene } from '@/scenes/TutorialScene';
@@ -33,6 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   scene: [
+    BootScene,
     LoginScene,
     MainMenuScene,
     TutorialScene,

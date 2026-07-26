@@ -5,7 +5,7 @@ import { getDifficultyConfig } from '@/systems/DifficultySystem';
 import { getTotalLevels } from '@/systems/MapLoader';
 import { getLevelDefinition } from '@/data/levels';
 import { playSFX } from '@/lib/AudioManager';
-import { screenShake, screenFlash, floatingText } from '@/systems/FeedbackSystem';
+import { screenShake, screenFlash, floatingText, confettiBurst, bossIntroEffect, victorySlowMotion } from '@/systems/FeedbackSystem';
 import { generateBossSprite } from '@/lib/SpriteGenerator';
 import { playMusic } from '@/lib/MusicManager';
 import { t } from '@/lib/i18n';
@@ -67,6 +67,7 @@ export class BossRushScene extends Phaser.Scene {
     this.remainingMs = 90000;
 
     this.buildUI();
+    bossIntroEffect(this);
     this.startTimer();
     this.startBossAutoAttack();
     this.nextPuzzle();
@@ -371,6 +372,8 @@ export class BossRushScene extends Phaser.Scene {
   private onVictory(): void {
     this.stopTimers();
     playSFX(this, 'sfx-victory');
+    confettiBurst(this, this.cameras.main.width / 2, this.cameras.main.height / 2);
+    victorySlowMotion(this);
 
     this.tweens.add({
       targets: this.bossSprite, alpha: 0, scaleX: 3, scaleY: 0.2,

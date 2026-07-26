@@ -5,7 +5,7 @@ import { getDifficultyConfig } from '@/systems/DifficultySystem';
 import { getTotalLevels } from '@/systems/MapLoader';
 import { getLevelDefinition } from '@/data/levels';
 import { playSFX } from '@/lib/AudioManager';
-import { screenShake, screenFlash, floatingText } from '@/systems/FeedbackSystem';
+import { screenShake, screenFlash, floatingText, confettiBurst, bossIntroEffect, victorySlowMotion } from '@/systems/FeedbackSystem';
 import { generateBossSprite } from '@/lib/SpriteGenerator';
 import { playMusic } from '@/lib/MusicManager';
 import { t } from '@/lib/i18n';
@@ -63,6 +63,7 @@ export class BossActionMenuScene extends Phaser.Scene {
     this.backupUsed = false;
 
     this.buildUI();
+    bossIntroEffect(this);
     this.showDialogue(this.sceneData.bossName + ' appears!', () => {
       this.startPlayerTurn();
     });
@@ -391,6 +392,8 @@ export class BossActionMenuScene extends Phaser.Scene {
     this.turnPhase = 'victory';
     this.stopTurnTimer();
     playSFX(this, 'sfx-victory');
+    confettiBurst(this, this.cameras.main.width / 2, this.cameras.main.height / 2);
+    victorySlowMotion(this);
 
     this.tweens.add({
       targets: this.bossSprite, alpha: 0, scaleX: 4, scaleY: 0.3,
