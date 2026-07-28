@@ -15,7 +15,7 @@ import { t } from '@/lib/i18n';
  * - Emits 'puzzle-scene:solved', 'puzzle-scene:failed', 'puzzle-scene:closed' via EventBus
  */
 
-const SCENE_WIDTH = 780;
+const SCENE_WIDTH = 960;
 const SCENE_HEIGHT = 540;
 
 interface PuzzleSceneData {
@@ -129,11 +129,12 @@ export class PuzzleScene extends Phaser.Scene {
       this.buildMultipleChoice(cx, cy, panelW);
     }
 
-    // Hint text (bottom area)
-    this.hintText = this.add.text(cx, cy + panelH / 2 - 50, '', {
-      fontSize: '12px', fontFamily: 'Press Start 2P, monospace', color: '#ffcc88',
-      wordWrap: { width: panelW - 60 }, align: 'center',
-    }).setOrigin(0.5);
+    // Hint text (below options, near panel bottom)
+    this.hintText = this.add.text(cx, cy + panelH / 2 - 18, '', {
+      fontSize: '10px', fontFamily: 'Press Start 2P, monospace', color: '#ffcc88',
+      wordWrap: { width: panelW - 40 }, align: 'center',
+      backgroundColor: '#1a1a3a', padding: { x: 8, y: 4 },
+    }).setOrigin(0.5).setDepth(20);
 
     // Feedback text
     this.feedbackText = this.add.text(cx, cy + panelH / 2 - 24, '', {

@@ -98,6 +98,14 @@ export class Enemy extends Phaser.GameObjects.Sprite {
     }
   }
 
+  /**
+   * Resume patrol after it was stopped (e.g., when returning from puzzle).
+   */
+  resumePatrol(): void {
+    if (this.moveTimer) return; // Already patrolling
+    this.startPatrol();
+  }
+
   // ─── Private ────────────────────────────────────────────────────────────
 
   private startPatrol(): void {

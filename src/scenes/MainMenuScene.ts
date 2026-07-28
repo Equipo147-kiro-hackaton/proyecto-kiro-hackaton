@@ -25,7 +25,6 @@ export class MainMenuScene extends Phaser.Scene {
   private titleText!: Phaser.GameObjects.Text;
   private welcomeText!: Phaser.GameObjects.Text;
   private selectDifficultyText!: Phaser.GameObjects.Text;
-  private newRunBtn!: Phaser.GameObjects.Text;
   private continueBtn: Phaser.GameObjects.Text | null = null;
   private leaderboardBtn!: Phaser.GameObjects.Text;
   private footerHintText!: Phaser.GameObjects.Text;
@@ -65,7 +64,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   private createBackground(): void {
     this.add.rectangle(480, 270, 960, 540, COLORS_HEX.BG_DARK);
-    this.gridGraphics = this.add.graphics().setAlpha(0.05);
+    this.gridGraphics = this.add.graphics().setAlpha(0.03);
   }
 
   private drawGrid(): void {
@@ -136,7 +135,7 @@ export class MainMenuScene extends Phaser.Scene {
       .text(480, 120, t('menu.select_difficulty'), {
         fontFamily: 'Press Start 2P, monospace',
         fontSize: '11px',
-        color: COLORS.TEXT_DIM,
+        color: '#8899aa',
       })
       .setOrigin(0.5);
 
@@ -174,7 +173,7 @@ export class MainMenuScene extends Phaser.Scene {
       const btn = this.add
         .text(480, y, `[ ${t(m.labelKey)} ]`, {
           fontFamily: 'Press Start 2P, monospace',
-          fontSize: '16px',
+          fontSize: '14px',
           color: m.color,
           fontStyle: 'bold',
         })
@@ -185,7 +184,7 @@ export class MainMenuScene extends Phaser.Scene {
         .text(480, y + 18, t(m.descKey), {
           fontFamily: 'Press Start 2P, monospace',
           fontSize: '9px',
-          color: COLORS.TEXT_MUTED,
+          color: '#667788',
         })
         .setOrigin(0.5);
 
@@ -194,6 +193,7 @@ export class MainMenuScene extends Phaser.Scene {
       btn.on('pointerdown', () => {
         this.selectedMode = m.mode;
         this.updateModeSelection();
+        this.startNewRun();
       });
       btn.on('pointerover', () => {
         if (this.selectedMode !== m.mode) btn.setAlpha(0.8);
@@ -208,30 +208,6 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private createActions(): void {
-    this.newRunBtn = this.add
-      .text(480, 325, t('menu.new_run'), {
-        fontFamily: 'Press Start 2P, monospace',
-        fontSize: '18px',
-        color: COLORS.SUCCESS_GREEN,
-        fontStyle: 'bold',
-      })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
-
-    this.newRunBtn.on('pointerover', () => this.newRunBtn.setColor('#88ffaa'));
-    this.newRunBtn.on('pointerout', () => this.newRunBtn.setColor(COLORS.SUCCESS_GREEN));
-    this.newRunBtn.on('pointerdown', () => this.startNewRun());
-
-    this.tweens.add({
-      targets: this.newRunBtn,
-      scaleX: 1.03,
-      scaleY: 1.03,
-      duration: 1000,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.inOut',
-    });
-
     if (getMostRecentSave('beginner') || getMostRecentSave('normal')) {
       this.continueBtn = this.add
         .text(480, 365, t('menu.continue'), {
@@ -249,7 +225,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     this.leaderboardBtn = this.add
-      .text(480, 410, t('menu.leaderboard'), {
+      .text(480, 340, t('menu.leaderboard'), {
         fontFamily: 'Press Start 2P, monospace',
         fontSize: '14px',
         color: COLORS.PRIMARY_BLUE,
@@ -265,7 +241,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   private createFooter(): void {
     this.footerHintText = this.add
-      .text(480, 500, t('menu.footer_hint'), {
+      .text(480, 440, t('menu.footer_hint'), {
         fontFamily: 'Press Start 2P, monospace',
         fontSize: '9px',
         color: COLORS.TEXT_MUTED,
@@ -277,16 +253,18 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ONE', () => {
       this.selectedMode = 'beginner';
       this.updateModeSelection();
+      this.startNewRun();
     });
     this.input.keyboard?.on('keydown-TWO', () => {
       this.selectedMode = 'normal';
       this.updateModeSelection();
+      this.startNewRun();
     });
     this.input.keyboard?.on('keydown-THREE', () => {
       this.selectedMode = 'hard';
       this.updateModeSelection();
+      this.startNewRun();
     });
-    this.input.keyboard?.on('keydown-ENTER', () => this.startNewRun());
     this.input.keyboard?.on('keydown-L', () => fadeToScene(this, 'LeaderboardScene'));
     this.input.keyboard?.on('keydown-M', () => this.handleMuteToggle());
   }
@@ -321,7 +299,6 @@ export class MainMenuScene extends Phaser.Scene {
       desc.setText(t(descKey));
     });
 
-    this.newRunBtn.setText(t('menu.new_run'));
     if (this.continueBtn) this.continueBtn.setText(t('menu.continue'));
     this.leaderboardBtn.setText(t('menu.leaderboard'));
     this.footerHintText.setText(t('menu.footer_hint'));

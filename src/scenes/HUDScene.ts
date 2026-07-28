@@ -2,17 +2,17 @@ import Phaser from 'phaser';
 import { EventBus } from '@/lib/EventBus';
 import { COLORS, COLORS_HEX } from '@/lib/Colors';
 import { t, onLocaleChange } from '@/lib/i18n';
+import { HUD_BLOCKS, hpSegments, objectiveCounterText } from '@/systems/HudLayout';
 import type { DifficultyMode } from '@/types';
 import type { TranslationKey } from '@/data/translations';
 
 /**
- * HUDScene — Right-side status panel overlay (180px wide).
- * Fixed panel showing all game state: HP, score, fragments, status, controls.
- * Fully i18n-aware: reacts to locale changes via onLocaleChange.
+ * HUDScene — Overlay-block HUD system.
+ * Renders status, score, controls, and top-band blocks as camera-fixed overlays.
+ * All elements use setScrollFactor(0) so they stay fixed regardless of camera position.
  */
 
-const PANEL_WIDTH = 180;
-const PANEL_X = 960 - PANEL_WIDTH;
+const BLOCK_ALPHA = 0.6;
 
 const LEVEL_NAME_KEYS: Record<number, TranslationKey> = {
   1: 'level.1.name',
@@ -29,33 +29,45 @@ const MODE_KEYS: Record<DifficultyMode, TranslationKey> = {
 };
 
 export class HUDScene extends Phaser.Scene {
-  private hearts: Phaser.GameObjects.Text[] = [];
-  private maxHearts = 4;
-
-  private fragmentBar!: Phaser.GameObjects.Graphics;
-  private fragmentCountText!: Phaser.GameObjects.Text;
-
-  private levelText!: Phaser.GameObjects.Text;
-  private modeBadge!: Phaser.GameObjects.Text;
-  private scoreText!: Phaser.GameObjects.Text;
-  private statusText!: Phaser.GameObjects.Text;
-  private saveIndicator!: Phaser.GameObjects.Text;
-  private saveTween: Phaser.Tweens.Tween | null = null;
-
-  // Labels that need locale refresh
+  // Status block elements
+  private hpSegmentGraphics!: Phaser.GameObjects.Graphics;
   private hpLabel!: Phaser.GameObjects.Text;
-  private scoreLabel!: Phaser.GameObjects.Text;
+  private objectivesText!: Phaser.GameObjects.Text;
   private fragmentsLabel!: Phaser.GameObjects.Text;
-  private statusLabel!: Phaser.GameObjects.Text;
+
+  // Score block elements
+  private scoreLabel!: Phaser.GameObjects.Text;
+  private scoreText!: Phaser.GameObjects.Text;
+
+  // Controls block elements
+  private controlsContainer!: Phaser.GameObjects.Container;
   private controlsLabel!: Phaser.GameObjects.Text;
   private controlsText!: Phaser.GameObjects.Text;
 
-  // Current state for re-rendering on locale change
+  // Top band elements
+  private topBandContainer!: Phaser.GameObjects.Container;
+  private levelText!: Phaser.GameObjects.Text;
+  private modeBadge!: Phaser.GameObjects.Text;
+
+  // Save indicator
+  private saveIndicator!: Phaser.GameObjects.Text;
+  private saveTween: Phaser.Tweens.Tween | null = null;
+
+  // Block backgrounds
+  private statusBg!: Phaser.GameObjects.Rectangle;
+  private scoreBg!: Phaser.GameObjects.Rectangle;
+  private controlsBg!: Phaser.GameObjects.Rectangle;
+  private topBandBg!: Phaser.GameObjects.Rectangle;
+
+  // Current state
+  private currentHearts = 4;
+  private maxHearts = 4;
+  private currentCollected = 0;
+  private currentTotal = 0;
   private currentLevel = 1;
   private currentScenarioName = '';
   private currentMode: DifficultyMode = 'normal';
-  private currentCollected = 0;
-  private currentTotal = 0;
+  private currentScore = 0;
 
   private localeUnsubscribe: (() => void) | null = null;
 
@@ -64,13 +76,22 @@ export class HUDScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.createPanelBackground();
-    this.createLevelSection();
-    this.createHeartsSection();
-    this.createScoreSection();
-    this.createFragmentSection();
-    this.createStatusSection();
-    this.createControlsSection();
+    // Lock HUD camera at origin — prevents scrolling with game world
+    this.cameras.main.setViewport(0, 0, 960, 540);
+    this.cameras.main.setScroll(0, 0);
+    this.cameras.main.setBounds(0, 0, 960, 540);
+
+    // Reset state on each session start
+    this.currentHearts = 4;
+    this.maxHearts = 4;
+    this.currentCollected = 0;
+    this.currentTotal = 0;
+    this.currentScore = 0;
+
+    this.createStatusBlock();
+    this.createScoreBlock();
+    this.createControlsBlock();
+    this.createTopBand();
     this.createSaveIndicator();
     this.setupEventListeners();
 
@@ -83,240 +104,173 @@ export class HUDScene extends Phaser.Scene {
     });
   }
 
-  // ─── Panel Background ───────────────────────────────────────────────────
+  // ─── Status Block (HP bar + objectives counter) ─────────────────────────
 
-  private createPanelBackground(): void {
-    this.add.rectangle(
-      PANEL_X + PANEL_WIDTH / 2, 270,
-      PANEL_WIDTH, 540,
-      COLORS_HEX.BG_DARK, 0.92
-    ).setStrokeStyle(2, COLORS_HEX.PRIMARY_BLUE, 0.5);
+  private createStatusBlock(): void {
+    const { x, y, width, height } = HUD_BLOCKS.status;
 
-    const sep = this.add.graphics();
-    sep.lineStyle(1, COLORS_HEX.PRIMARY_BLUE, 0.3);
-    sep.lineBetween(PANEL_X, 0, PANEL_X, 540);
-  }
+    this.statusBg = this.add.rectangle(
+      x + width / 2, y + height / 2,
+      width, height,
+      COLORS_HEX.BG_DARK, BLOCK_ALPHA,
+    ).setScrollFactor(0);
 
-  // ─── Level & Difficulty ─────────────────────────────────────────────────
+    // HP label
+    this.hpLabel = this.add.text(x + 8, y + 8, t('hud.hp'), {
+      fontSize: '8px',
+      fontFamily: 'Press Start 2P, monospace',
+      color: COLORS.TEXT_DIM,
+    }).setScrollFactor(0);
 
-  private createLevelSection(): void {
-    const x = PANEL_X + PANEL_WIDTH / 2;
+    // HP segment bar (drawn as filled rectangles)
+    this.hpSegmentGraphics = this.add.graphics().setScrollFactor(0);
+    this.drawHpSegments(this.currentHearts);
 
-    this.levelText = this.add.text(x, 16, t('level.1.name'), {
+    // Fragments / objectives label
+    this.fragmentsLabel = this.add.text(x + 8, y + 40, t('hud.fragments'), {
+      fontSize: '8px',
+      fontFamily: 'Press Start 2P, monospace',
+      color: COLORS.TEXT_DIM,
+    }).setScrollFactor(0);
+
+    // Objectives counter text (X/N format)
+    this.objectivesText = this.add.text(x + width - 8, y + 40, objectiveCounterText(0, 0), {
       fontSize: '10px',
       fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.TEXT_WHITE,
-      fontStyle: 'bold',
-      align: 'center',
-      wordWrap: { width: PANEL_WIDTH - 16 },
-    }).setOrigin(0.5, 0);
-
-    this.modeBadge = this.add.text(x, 44, t('menu.difficulty.normal'), {
-      fontSize: '8px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.DIFFICULTY_NORMAL,
-      backgroundColor: '#1a1a2e',
-      padding: { x: 6, y: 2 },
-    }).setOrigin(0.5, 0);
-
-    this.addSeparator(62);
+      color: COLORS.HUD_FRAGMENTS,
+    }).setOrigin(1, 0).setScrollFactor(0);
   }
 
-  // ─── Hearts ─────────────────────────────────────────────────────────────
+  private drawHpSegments(filledCount: number): void {
+    const { x, y } = HUD_BLOCKS.status;
+    const segX = x + 40;
+    const segY = y + 8;
+    const segWidth = 40;
+    const segHeight = 14;
+    const gap = 4;
+    const totalSegments = 4;
 
-  private createHeartsSection(): void {
-    const x = PANEL_X + 12;
-    const y = 72;
+    this.hpSegmentGraphics.clear();
 
-    this.hpLabel = this.add.text(x, y, t('hud.hp'), {
-      fontSize: '8px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.TEXT_DIM,
-    });
+    for (let i = 0; i < totalSegments; i++) {
+      const sx = segX + i * (segWidth + gap);
 
-    this.hearts = [];
-    for (let i = 0; i < this.maxHearts; i++) {
-      const heart = this.add.text(x + 22 + i * 18, y - 2, '\u2665', {
-        fontSize: '14px',
-        fontFamily: 'Press Start 2P, monospace',
-        color: COLORS.HUD_HEARTS,
-      });
-      this.hearts.push(heart);
-    }
-  }
-
-  updateHearts(current: number, max?: number): void {
-    if (max !== undefined) this.maxHearts = max;
-
-    for (let i = 0; i < this.hearts.length; i++) {
-      if (i < current) {
-        this.hearts[i].setText('\u2665');
-        this.hearts[i].setColor(COLORS.HUD_HEARTS);
-        this.hearts[i].setAlpha(1);
+      if (i < filledCount) {
+        this.hpSegmentGraphics.fillStyle(COLORS_HEX.DANGER_RED, 1);
+        this.hpSegmentGraphics.fillRect(sx, segY, segWidth, segHeight);
       } else {
-        this.hearts[i].setText('\u2661');
-        this.hearts[i].setColor(COLORS.HUD_HEARTS_EMPTY);
-        this.hearts[i].setAlpha(0.5);
-      }
-    }
-
-    if (current < this.maxHearts && current >= 0) {
-      const lostHeart = this.hearts[current];
-      if (lostHeart) {
-        this.tweens.add({
-          targets: lostHeart,
-          scaleX: 1.5,
-          scaleY: 1.5,
-          duration: 150,
-          yoyo: true,
-          ease: 'Power2',
-        });
+        this.hpSegmentGraphics.fillStyle(COLORS_HEX.BG_PANEL, 0.8);
+        this.hpSegmentGraphics.fillRect(sx, segY, segWidth, segHeight);
+        this.hpSegmentGraphics.lineStyle(1, COLORS_HEX.DANGER_RED, 0.4);
+        this.hpSegmentGraphics.strokeRect(sx, segY, segWidth, segHeight);
       }
     }
   }
 
-  // ─── Score ──────────────────────────────────────────────────────────────
+  // ─── Score Block ────────────────────────────────────────────────────────
 
-  private createScoreSection(): void {
-    const x = PANEL_X + 12;
-    const y = 96;
+  private createScoreBlock(): void {
+    const { x, y, width, height } = HUD_BLOCKS.score;
 
-    this.scoreLabel = this.add.text(x, y, t('hud.score'), {
+    this.scoreBg = this.add.rectangle(
+      x + width / 2, y + height / 2,
+      width, height,
+      COLORS_HEX.BG_DARK, BLOCK_ALPHA,
+    ).setScrollFactor(0);
+
+    this.scoreLabel = this.add.text(x + 8, y + 8, t('hud.score'), {
       fontSize: '8px',
       fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_DIM,
-    });
+    }).setScrollFactor(0);
 
-    this.scoreText = this.add.text(PANEL_X + PANEL_WIDTH - 12, y, '0', {
-      fontSize: '12px',
+    this.scoreText = this.add.text(x + width - 8, y + 8, '0', {
+      fontSize: '14px',
       fontFamily: 'Press Start 2P, monospace',
       color: COLORS.HUD_SCORE,
       fontStyle: 'bold',
-    }).setOrigin(1, 0);
-
-    this.addSeparator(116);
+    }).setOrigin(1, 0).setScrollFactor(0);
   }
 
-  updateScore(score: number): void {
-    this.scoreText.setText(`${score}`);
-    this.tweens.add({
-      targets: this.scoreText,
-      scaleX: 1.2,
-      scaleY: 1.2,
-      duration: 100,
-      yoyo: true,
-      ease: 'Power2',
-    });
-  }
+  // ─── Controls Block (hidden in hard mode) ───────────────────────────────
 
-  // ─── Fragment Progress ──────────────────────────────────────────────────
+  private createControlsBlock(): void {
+    const { x, y, width, height } = HUD_BLOCKS.controls;
 
-  private createFragmentSection(): void {
-    const x = PANEL_X + 12;
-    const y = 126;
+    this.controlsBg = this.add.rectangle(
+      x + width / 2, y + height / 2,
+      width, height,
+      COLORS_HEX.BG_DARK, BLOCK_ALPHA,
+    ).setScrollFactor(0);
 
-    this.fragmentsLabel = this.add.text(x, y, t('hud.fragments'), {
-      fontSize: '8px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.TEXT_DIM,
-    });
-
-    this.fragmentCountText = this.add.text(PANEL_X + PANEL_WIDTH - 12, y, '0/0', {
-      fontSize: '9px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.HUD_FRAGMENTS,
-    }).setOrigin(1, 0);
-
-    this.fragmentBar = this.add.graphics();
-    this.drawFragmentBar(0, 0);
-
-    this.addSeparator(156);
-  }
-
-  private drawFragmentBar(collected: number, total: number): void {
-    const x = PANEL_X + 12;
-    const y = 142;
-    const barWidth = PANEL_WIDTH - 24;
-    const barHeight = 8;
-
-    this.fragmentBar.clear();
-    this.fragmentBar.fillStyle(0x222233, 1);
-    this.fragmentBar.fillRect(x, y, barWidth, barHeight);
-    this.fragmentBar.lineStyle(1, COLORS_HEX.HUD_FRAGMENTS, 0.5);
-    this.fragmentBar.strokeRect(x, y, barWidth, barHeight);
-
-    if (total > 0) {
-      const fillWidth = Math.floor((collected / total) * barWidth);
-      this.fragmentBar.fillStyle(COLORS_HEX.HUD_FRAGMENTS, 0.8);
-      this.fragmentBar.fillRect(x, y, fillWidth, barHeight);
-    }
-  }
-
-  updateFragments(collected: number, total: number): void {
-    this.currentCollected = collected;
-    this.currentTotal = total;
-    this.fragmentCountText.setText(`${collected}/${total}`);
-    this.drawFragmentBar(collected, total);
-
-    if (collected >= total && total > 0) {
-      this.statusText.setText(t('hud.status_unlocked'));
-      this.statusText.setColor(COLORS.SUCCESS_GREEN);
-    } else if (total > 0) {
-      this.statusText.setText(t('hud.status_remaining', { count: total - collected }));
-      this.statusText.setColor(COLORS.TEXT_DIM);
-    }
-  }
-
-  // ─── Status Section ─────────────────────────────────────────────────────
-
-  private createStatusSection(): void {
-    const x = PANEL_X + 12;
-    const y = 166;
-
-    this.statusLabel = this.add.text(x, y, t('hud.status'), {
-      fontSize: '8px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.TEXT_DIM,
-    });
-
-    this.statusText = this.add.text(x, y + 14, t('hud.status_default'), {
-      fontSize: '9px',
-      fontFamily: 'Press Start 2P, monospace',
-      color: COLORS.TEXT_DIM,
-      lineSpacing: 2,
-      wordWrap: { width: PANEL_WIDTH - 24 },
-    });
-  }
-
-  // ─── Controls ───────────────────────────────────────────────────────────
-
-  private createControlsSection(): void {
-    const x = PANEL_X + 12;
-    const y = 440;
-
-    this.addSeparator(y - 8);
-
-    this.controlsLabel = this.add.text(x, y, t('hud.controls'), {
+    this.controlsLabel = this.add.text(x + 8, y + 8, t('hud.controls'), {
       fontSize: '7px',
       fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_MUTED,
-    });
+    }).setScrollFactor(0);
 
-    this.controlsText = this.add.text(x, y + 12, t('hud.controls_list'), {
+    this.controlsText = this.add.text(x + 8, y + 22, t('hud.controls_list'), {
       fontSize: '7px',
       fontFamily: 'Press Start 2P, monospace',
       color: COLORS.TEXT_MUTED,
       lineSpacing: 3,
-    });
+    }).setScrollFactor(0);
+
+    // Container to manage visibility together
+    this.controlsContainer = this.add.container(0, 0, [
+      this.controlsBg,
+      this.controlsLabel,
+      this.controlsText,
+    ]).setScrollFactor(0);
+  }
+
+  // ─── Top Band (difficulty name + objectives + score) ────────────────────
+
+  private createTopBand(): void {
+    const { x, y, width, height } = HUD_BLOCKS.topBand;
+
+    this.topBandBg = this.add.rectangle(
+      x + width / 2, y + height / 2,
+      width, height,
+      COLORS_HEX.BG_DARK, BLOCK_ALPHA,
+    ).setScrollFactor(0);
+
+    const levelKey = LEVEL_NAME_KEYS[this.currentLevel] ?? ('level.1.name' as TranslationKey);
+    this.levelText = this.add.text(x + width / 2, y + 4, t(levelKey), {
+      fontSize: '8px',
+      fontFamily: 'Press Start 2P, monospace',
+      color: COLORS.TEXT_WHITE,
+      align: 'center',
+    }).setOrigin(0.5, 0).setScrollFactor(0);
+
+    const modeColors: Record<DifficultyMode, string> = {
+      beginner: COLORS.DIFFICULTY_BEGINNER,
+      normal: COLORS.DIFFICULTY_NORMAL,
+      hard: COLORS.DIFFICULTY_HARD,
+    };
+    this.modeBadge = this.add.text(x + width / 2, y + 16, t(MODE_KEYS[this.currentMode]), {
+      fontSize: '7px',
+      fontFamily: 'Press Start 2P, monospace',
+      color: modeColors[this.currentMode],
+    }).setOrigin(0.5, 0).setScrollFactor(0);
+
+    this.topBandContainer = this.add.container(0, 0, [
+      this.topBandBg,
+      this.levelText,
+      this.modeBadge,
+    ]).setScrollFactor(0);
+
+    // Top band: always visible to show current difficulty
+    this.topBandContainer.setVisible(true);
   }
 
   // ─── Save Indicator ─────────────────────────────────────────────────────
 
   private createSaveIndicator(): void {
     this.saveIndicator = this.add.text(
-      PANEL_X + PANEL_WIDTH / 2, 520, '',
-      { fontSize: '8px', fontFamily: 'Press Start 2P, monospace', color: COLORS.SUCCESS_GREEN }
-    ).setOrigin(0.5).setAlpha(0);
+      480, 520, '',
+      { fontSize: '8px', fontFamily: 'Press Start 2P, monospace', color: COLORS.SUCCESS_GREEN },
+    ).setOrigin(0.5).setAlpha(0).setScrollFactor(0);
   }
 
   showSaveIndicator(): void {
@@ -333,21 +287,40 @@ export class HUDScene extends Phaser.Scene {
     });
   }
 
-  // ─── Helpers ────────────────────────────────────────────────────────────
+  // ─── Public Updaters ────────────────────────────────────────────────────
 
-  private addSeparator(y: number): void {
-    const sep = this.add.graphics();
-    sep.lineStyle(1, COLORS_HEX.BG_PANEL_BORDER, 0.5);
-    sep.lineBetween(PANEL_X + 10, y, PANEL_X + PANEL_WIDTH - 10, y);
+  updateHearts(current: number, max?: number): void {
+    if (max !== undefined) this.maxHearts = max;
+    this.currentHearts = current;
+
+    const segments = hpSegments(current * 25); // convert hearts to HP scale
+    this.drawHpSegments(segments);
   }
 
-  // ─── Public Updaters ────────────────────────────────────────────────────
+  updateScore(score: number): void {
+    this.currentScore = score;
+    this.scoreText.setText(`${score}`);
+    this.tweens.add({
+      targets: this.scoreText,
+      scaleX: 1.2,
+      scaleY: 1.2,
+      duration: 100,
+      yoyo: true,
+      ease: 'Power2',
+    });
+  }
+
+  updateFragments(collected: number, total: number): void {
+    this.currentCollected = collected;
+    this.currentTotal = total;
+    this.objectivesText.setText(objectiveCounterText(collected, total));
+  }
 
   updateLevel(levelNumber: number, scenarioName: string): void {
     this.currentLevel = levelNumber;
     this.currentScenarioName = scenarioName;
     const levelKey = LEVEL_NAME_KEYS[levelNumber] ?? ('level.1.name' as TranslationKey);
-    this.levelText.setText(`${t(levelKey)}\n${scenarioName}`);
+    this.levelText.setText(`${t(levelKey)}`);
   }
 
   updateMode(mode: DifficultyMode): void {
@@ -359,6 +332,12 @@ export class HUDScene extends Phaser.Scene {
     };
     this.modeBadge.setText(t(MODE_KEYS[mode]));
     this.modeBadge.setColor(colors[mode]);
+
+    // Controls block: hidden in hard mode
+    this.controlsContainer.setVisible(mode !== 'hard');
+
+    // Top band: always visible to show current difficulty
+    this.topBandContainer.setVisible(true);
   }
 
   // ─── Locale Refresh ─────────────────────────────────────────────────────
@@ -367,23 +346,12 @@ export class HUDScene extends Phaser.Scene {
     this.hpLabel.setText(t('hud.hp'));
     this.scoreLabel.setText(t('hud.score'));
     this.fragmentsLabel.setText(t('hud.fragments'));
-    this.statusLabel.setText(t('hud.status'));
     this.controlsLabel.setText(t('hud.controls'));
     this.controlsText.setText(t('hud.controls_list'));
 
-    // Re-render level and mode
     const levelKey = LEVEL_NAME_KEYS[this.currentLevel] ?? ('level.1.name' as TranslationKey);
-    this.levelText.setText(`${t(levelKey)}\n${this.currentScenarioName}`);
+    this.levelText.setText(`${t(levelKey)}`);
     this.modeBadge.setText(t(MODE_KEYS[this.currentMode]));
-
-    // Re-render status text based on current fragment state
-    if (this.currentCollected >= this.currentTotal && this.currentTotal > 0) {
-      this.statusText.setText(t('hud.status_unlocked'));
-    } else if (this.currentTotal > 0) {
-      this.statusText.setText(t('hud.status_remaining', { count: this.currentTotal - this.currentCollected }));
-    } else {
-      this.statusText.setText(t('hud.status_default'));
-    }
   }
 
   // ─── Event Listeners ────────────────────────────────────────────────────

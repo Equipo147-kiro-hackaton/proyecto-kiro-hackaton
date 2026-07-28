@@ -87,6 +87,7 @@ const en = {
   'gameover.bugs_defeated': 'Bugs Defeated: {count}',
   'gameover.puzzles_solved': 'Puzzles Solved: {count}',
   'gameover.new_run': '[ NEW RUN ]',
+  'gameover.try_again': '[ TRY AGAIN ]',
   'gameover.view_leaderboard': '[ VIEW LEADERBOARD ]',
 
   // ─── Victory ─────────────────────────────────────────────────────────────
@@ -226,6 +227,7 @@ const es: Record<keyof typeof en, string> = {
   'gameover.bugs_defeated': 'Bugs derrotados: {count}',
   'gameover.puzzles_solved': 'Puzzles resueltos: {count}',
   'gameover.new_run': '[ NUEVA PARTIDA ]',
+  'gameover.try_again': '[ INTENTAR DE NUEVO ]',
   'gameover.view_leaderboard': '[ VER RANKING ]',
 
   // ─── Victory ─────────────────────────────────────────────────────────────

@@ -460,3 +460,47 @@ function drawBossFrame(ctx: CanvasRenderingContext2D, x: number, y: number, isDa
   ctx.fillRect(x + 12, y + 10, 2, 3);
   ctx.fillRect(x + 18, y + 10, 2, 3);
 }
+
+// ─── Theme Fallback Textures (Dungeon Visual Overhaul) ────────────────────────
+
+import type { Theme } from '@/systems/ThemeSystem';
+import type { PropType } from '@/types';
+
+export function fallbackPropTextureKey(type: PropType, themeId: string): string {
+  return `fb-prop-${type}-${themeId}`;
+}
+
+export function generateThemeFallbackTextures(scene: Phaser.Scene, theme: Theme): void {
+  const size = 16;
+  const { palette } = theme;
+
+  const textures: Array<{ key: string; color: number }> = [
+    { key: `fb-floor-${theme.id}`, color: palette.floor },
+    { key: `fb-wall-${theme.id}`, color: palette.wall },
+    { key: `fb-empty-${theme.id}`, color: palette.empty },
+  ];
+
+  const propTypes: PropType[] = [
+    'server-rack', 'crt-monitor', 'server-tower', 'power-panel',
+    'cable-bundle', 'energy-container', 'corrupt-container', 'padlock',
+  ];
+
+  for (const pt of propTypes) {
+    textures.push({ key: fallbackPropTextureKey(pt, theme.id), color: palette.wall });
+  }
+
+  for (const { key, color } of textures) {
+    if (scene.textures.exists(key)) continue;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) continue;
+    const r = (color >> 16) & 0xff;
+    const g = (color >> 8) & 0xff;
+    const b = color & 0xff;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(0, 0, size, size);
+    scene.textures.addCanvas(key, canvas);
+  }
+}

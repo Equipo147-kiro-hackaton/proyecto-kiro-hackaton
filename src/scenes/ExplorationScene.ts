@@ -23,13 +23,19 @@ import { COLORS_HEX } from '@/lib/Colors';
 import { EventBus } from '@/lib/EventBus';
 import { generateAllSprites } from '@/lib/SpriteGenerator';
 import { playMusic, stopMusic, updateMusicVolume, type MusicTrack } from '@/lib/MusicManager';
-import { generateProceduralMap, registerProceduralMap } from '@/lib/ProceduralMap';
+import { registerProceduralMap } from '@/lib/ProceduralMap';
+import { buildFloor } from '@/systems/MapPipeline';
+import { generateThemeFallbackTextures } from '@/lib/SpriteGenerator';
+import { computeCameraFrame } from '@/systems/CameraFraming';
+import { CameraController } from '@/entities/CameraController';
+import type { FloorDescriptor } from '@/types';
+import type { Theme } from '@/systems/ThemeSystem';
 import { t } from '@/lib/i18n';
 import { HERO_VARIANT_BY_DIFFICULTY } from '@/types';
 import type { Interactable, DifficultyMode } from '@/types';
 
-/** Viewport width excluding the right HUD panel */
-const GAME_VIEWPORT_WIDTH = 780;
+/** Viewport width — full 960px (HUD panel handled in Task 8) */
+const GAME_VIEWPORT_WIDTH = 960;
 
 /** Trap tile data */
 interface TrapTile {
@@ -80,6 +86,11 @@ export class ExplorationScene extends Phaser.Scene {
   private minimapGraphics!: Phaser.GameObjects.Graphics;
   private exploredTiles: Set<string> = new Set();
 
+  // Dungeon Visual Overhaul
+  private floor: FloorDescriptor | null = null;
+  private currentTheme: Theme | null = null;
+  private cameraCtrl: CameraController | null = null;
+
   constructor() { super('ExplorationScene'); }
 
   init(data: { level?: number; difficulty?: DifficultyMode; hp?: number; score?: number }): void {
@@ -118,32 +129,46 @@ export class ExplorationScene extends Phaser.Scene {
     const ld = getLevelDefinition(this.currentLevel);
     if (ld) this.fragmentSystem.initLevel(ld.id);
 
-    // Generate and register a procedural map using the Puny Dungeon tileset
-    const procMap = generateProceduralMap(this.currentLevel, mc.scenario);
-    registerProceduralMap(this, procMap);
+    // === Dungeon Visual Overhaul: new pipeline ===
+    const seed = Date.now() + this.currentLevel * 1000;
+    const built = buildFloor({
+      difficulty: this.difficulty,
+      levelNumber: this.currentLevel,
+      seed,
+    });
+    this.floor = built.floor;
+    this.currentTheme = built.theme;
 
-    // Use the procedural map with the new tileset
-    this.map = this.make.tilemap({ key: procMap.mapKey });
-    const ts = this.map.addTilesetImage('puny-dungeon', 'tiles-puny-dungeon');
-    if (!ts) {
-      // Fallback: try original tileset/map
-      this.map = this.make.tilemap({ key: mc.mapKey });
-      const fallbackTs = this.map.addTilesetImage(mc.tilesetName, mc.tilesetKey);
-      if (!fallbackTs) { this.scene.start('MainMenuScene'); return; }
-      this.map.createLayer('ground', fallbackTs, 0, 0);
-      const cl = this.map.createLayer('collision', fallbackTs, 0, 0);
-      if (!cl) { this.scene.start('MainMenuScene'); return; }
-      this.collisionLayer = cl;
-    } else {
-      this.map.createLayer('ground', ts, 0, 0);
-      const cl = this.map.createLayer('collision', ts, 0, 0);
-      if (!cl) { this.scene.start('MainMenuScene'); return; }
-      this.collisionLayer = cl;
+    generateThemeFallbackTextures(this, built.theme);
+
+    if (built.json) {
+      registerProceduralMap(this, { mapKey: built.mapKey, json: built.json as unknown as object });
     }
 
+    // Use the procedural map with the tileset
+    const tilesetKey = this.textures.exists('tiles-puny-dungeon') ? 'tiles-puny-dungeon' : `fb-floor-${built.theme.id}`;
+    this.map = this.make.tilemap({ key: built.mapKey });
+    const ts = this.map.addTilesetImage('puny-dungeon', tilesetKey);
+    if (!ts) { this.scene.start('MainMenuScene'); return; }
+
+    const groundLayer = this.map.createLayer('ground', ts, 0, 0);
+    const cl = this.map.createLayer('collision', ts, 0, 0);
+    if (!cl) { this.scene.start('MainMenuScene'); return; }
+    this.collisionLayer = cl;
+
+    // Apply theme tints
+    if (groundLayer) {
+      groundLayer.forEachTile((tile) => { tile.tint = built.theme.tints.floor; });
+    }
+    this.collisionLayer.forEachTile((tile) => {
+      if (tile.index > 0) { tile.tint = built.theme.tints.wall; }
+    });
+
+    // NO setAlpha(0.5) — full opacity for contrast (Req 1.7)
     this.collisionLayer.setCollisionByExclusion([0]);
-    this.collisionLayer.setAlpha(0.5);
-    this.collisionData = this.extractCollisionData();
+
+    // Use collision directly from the validated descriptor (Req 3.12)
+    this.collisionData = built.floor.collision;
     this.initInteractables();
     this.placeObjectSprites();
 
@@ -159,17 +184,18 @@ export class ExplorationScene extends Phaser.Scene {
     this.spawnHero();
     this.interactionIndicator = new InteractionIndicator(this);
 
-    // Camera: limit viewport to leave space for HUD panel
-    this.cameras.main.setViewport(0, 0, GAME_VIEWPORT_WIDTH, 540);
-    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-    this.cameras.main.setZoom(2.5);
-    this.cameras.main.startFollow(this.hero, true, 0.1, 0.1);
+    // Camera: computed framing based on difficulty and map size
+    this.cameraCtrl = new CameraController(this);
+    const cameraFrame = computeCameraFrame(this.difficulty, this.floor?.width ?? this.map.width, this.floor?.height ?? this.map.height);
+    this.cameraCtrl.apply(cameraFrame, this.floor?.width ?? this.map.width, this.floor?.height ?? this.map.height);
+    this.cameraCtrl.follow(this.hero);
 
     this.createLighting(mc.scenario);
     this.createMinimap();
 
     this.setupInput();
     this.scene.launch('HUDScene');
+    this.scene.bringToTop('HUDScene');
     this.updateHUD();
   }
 
@@ -253,7 +279,8 @@ export class ExplorationScene extends Phaser.Scene {
       const cy = interactable.tileY * th + th / 2;
 
       if (interactable.type === 'door') {
-        // Door: golden glow
+        // Door: only show when all fragments are collected
+        if (!areAllFragmentInteractablesActivated(this.interactables)) continue;
         this.markerGraphics.fillStyle(COLORS_HEX.ACCENT_GOLD, pulse * 0.6);
         this.markerGraphics.fillCircle(cx, cy, 5);
         this.markerGraphics.lineStyle(1, COLORS_HEX.ACCENT_GOLD, pulse);
@@ -492,6 +519,13 @@ export class ExplorationScene extends Phaser.Scene {
       const variant = i % 4;
       const enemy = new Enemy(this, pos.x, pos.y, tw, variant);
       enemy.setCollisionCheck((tx, ty) => isTileWalkable(this.collisionData, this.map.width, tx, ty));
+      enemy.setContactCallback((enemyTileX, enemyTileY) => {
+        if (!this.hero) return;
+        const { tileX: heroTX, tileY: heroTY } = this.hero.getTilePosition();
+        if (enemyTileX === heroTX && enemyTileY === heroTY) {
+          this.handleEnemyContact();
+        }
+      });
       this.enemies.push(enemy);
     }
   }
@@ -531,14 +565,20 @@ export class ExplorationScene extends Phaser.Scene {
   // ─── Hero & Input ───────────────────────────────────────────────────────
 
   private spawnHero(): void {
-    const ol = this.map.getObjectLayer('objects');
     let sx = 2, sy = 2;
-    if (ol) {
-      const sp = ol.objects.find((o) => Array.isArray(o.properties) && o.properties.some((p: { name: string; value: unknown }) => p.name === 'objectType' && p.value === 'spawn'));
-      if (sp) { sx = Math.floor((sp.x ?? 0) / this.map.tileWidth); sy = Math.floor((sp.y ?? 0) / this.map.tileHeight); }
+    if (this.floor) {
+      sx = this.floor.spawn.column;
+      sy = this.floor.spawn.row;
+    } else {
+      const ol = this.map.getObjectLayer('objects');
+      if (ol) {
+        const sp = ol.objects.find((o) => Array.isArray(o.properties) && o.properties.some((p: { name: string; value: unknown }) => p.name === 'objectType' && p.value === 'spawn'));
+        if (sp) { sx = Math.floor((sp.x ?? 0) / this.map.tileWidth); sy = Math.floor((sp.y ?? 0) / this.map.tileHeight); }
+      }
     }
     this.hero = new Hero(this, sx, sy, this.map.tileWidth, `hero-${HERO_VARIANT_BY_DIFFICULTY[this.difficulty]}`);
-    this.hero.setCollisionCheck((tx, ty) => isTileWalkable(this.collisionData, this.map.width, tx, ty));
+    this.hero.setCollisionCheck((tileX: number, tileY: number) => isTileWalkable(this.collisionData, this.map.width, tileX, tileY));
+    this.hero.setDepth(10);
   }
 
   private setupInput(): void {
@@ -565,8 +605,47 @@ export class ExplorationScene extends Phaser.Scene {
   private initInteractables(): void {
     const ol = this.map.getObjectLayer('objects');
     if (!ol) return;
-    const objs: TiledObjectData[] = ol.objects.map((o) => ({ id: o.id, name: o.name, type: o.type ?? '', x: o.x ?? 0, y: o.y ?? 0, width: o.width ?? 16, height: o.height ?? 16, properties: Array.isArray(o.properties) ? o.properties.map((p: { name: string; type: string; value: string | number | boolean }) => ({ name: p.name, type: p.type, value: p.value })) : undefined }));
-    this.interactables = parseInteractables(objs, this.map.tileWidth, this.map.tileHeight);
+
+    const validTypes: string[] = ['terminal', 'server', 'whiteboard', 'door', 'checkpoint'];
+    this.interactables = [];
+
+    for (const o of ol.objects) {
+      const objType = o.type ?? '';
+      if (!validTypes.includes(objType)) continue;
+
+      const tileX = Math.floor((o.x ?? 0) / this.map.tileWidth);
+      const tileY = Math.floor((o.y ?? 0) / this.map.tileHeight);
+
+      // Extract properties - handle both array format and Phaser's flat format
+      let fragmentId: string | undefined;
+      let puzzleId: string | undefined;
+      let locked: boolean | undefined;
+
+      if (Array.isArray(o.properties)) {
+        for (const p of o.properties as Array<{ name: string; type: string; value: string | number | boolean }>) {
+          if (p.name === 'fragmentId' && typeof p.value === 'string') fragmentId = p.value;
+          if (p.name === 'puzzleId' && typeof p.value === 'string') puzzleId = p.value;
+          if (p.name === 'locked' && typeof p.value === 'boolean') locked = p.value;
+        }
+      } else if (o.properties && typeof o.properties === 'object') {
+        // Phaser sometimes converts to flat object
+        const props = o.properties as Record<string, unknown>;
+        if (typeof props['fragmentId'] === 'string') fragmentId = props['fragmentId'];
+        if (typeof props['puzzleId'] === 'string') puzzleId = props['puzzleId'];
+        if (typeof props['locked'] === 'boolean') locked = props['locked'];
+      }
+
+      this.interactables.push({
+        id: `interactable-${o.id}`,
+        type: objType as import('@/types').InteractableType,
+        tileX,
+        tileY,
+        fragmentId,
+        puzzleId,
+        locked,
+        activated: false,
+      });
+    }
   }
 
   private placeObjectSprites(): void {
@@ -586,7 +665,13 @@ export class ExplorationScene extends Phaser.Scene {
 
       const px = interactable.tileX * tw + tw / 2;
       const py = interactable.tileY * th + th / 2;
-      this.add.image(px, py, texKey).setDepth(5);
+      const sprite = this.add.image(px, py, texKey).setDepth(5);
+
+      // Door starts invisible — revealed when all fragments are collected
+      if (interactable.type === 'door') {
+        sprite.setVisible(false);
+        sprite.setData('interactableId', interactable.id);
+      }
     }
   }
 
@@ -653,6 +738,11 @@ export class ExplorationScene extends Phaser.Scene {
     this.puzzleActive = true;
     playSFX(this, 'sfx-interact');
 
+    // Pause all enemies while puzzle is active
+    for (const enemy of this.enemies) {
+      enemy.stopPatrol();
+    }
+
     // Launch PuzzleScene as parallel overlay (renders at native res, no zoom)
     this.scene.launch('PuzzleScene', {
       puzzle,
@@ -661,8 +751,21 @@ export class ExplorationScene extends Phaser.Scene {
     });
 
     // Listen for puzzle results via EventBus
-    const onSolved = (data: { remainingSeconds: number; fragmentId?: string }) => {
+    let puzzleHandled = false;
+
+    const unlockGame = () => {
+      if (!this.puzzleActive) return; // Already unlocked
       this.cleanupPuzzleListeners();
+      for (const enemy of this.enemies) {
+        enemy.resumePatrol();
+      }
+      this.puzzleActive = false;
+      this.hero.setMovementLocked(false);
+    };
+
+    const onSolved = (data: { remainingSeconds: number; fragmentId?: string }) => {
+      if (puzzleHandled) return;
+      puzzleHandled = true;
       activateInteractable(interactable.id, this.interactables);
       if (interactable.fragmentId) this.fragmentSystem.collectFragment(interactable.fragmentId);
       const gain = 100 + data.remainingSeconds * 2;
@@ -675,7 +778,8 @@ export class ExplorationScene extends Phaser.Scene {
     };
 
     const onFailed = () => {
-      this.cleanupPuzzleListeners();
+      if (puzzleHandled) return;
+      puzzleHandled = true;
       const cfg = getDifficultyConfig(this.difficulty);
       this.heroHP = Math.max(0, this.heroHP - cfg.hpLossOnTimeout);
       if (this.heroHP <= 0) { this.onDefeat(); return; }
@@ -683,13 +787,22 @@ export class ExplorationScene extends Phaser.Scene {
     };
 
     const onClosed = () => {
-      this.puzzleActive = false;
-      this.hero.setMovementLocked(false);
+      unlockGame();
     };
 
     EventBus.on('puzzle-scene:solved', onSolved);
     EventBus.on('puzzle-scene:failed', onFailed);
     EventBus.on('puzzle-scene:closed', onClosed);
+
+    // CRITICAL FALLBACK: Listen for PuzzleScene's Phaser shutdown event directly.
+    // This fires GUARANTEED when scene.stop('PuzzleScene') is called, even if
+    // EventBus events are lost or timers don't fire.
+    const puzzleScene = this.scene.get('PuzzleScene');
+    if (puzzleScene) {
+      puzzleScene.events.once('shutdown', () => {
+        unlockGame();
+      });
+    }
 
     // Store refs for cleanup
     this._puzzleListenerCleanup = () => {
@@ -729,7 +842,20 @@ export class ExplorationScene extends Phaser.Scene {
   }
 
   private checkCompletion(): void {
-    if (areAllFragmentInteractablesActivated(this.interactables)) floatingText(this, this.hero.x, this.hero.y - 24, t('explore.door_unlocked'), '#ffdd00');
+    if (areAllFragmentInteractablesActivated(this.interactables)) {
+      floatingText(this, this.hero.x, this.hero.y - 24, t('explore.door_unlocked'), '#ffdd00');
+
+      // Reveal door sprite when all terminals are done
+      this.children.list.forEach((child) => {
+        if (child instanceof Phaser.GameObjects.Image && child.getData('interactableId')) {
+          const id = child.getData('interactableId') as string;
+          const interactable = this.interactables.find((i) => i.id === id && i.type === 'door');
+          if (interactable) {
+            child.setVisible(true);
+          }
+        }
+      });
+    }
   }
 
   // ─── Scene Transitions ──────────────────────────────────────────────────
@@ -773,9 +899,5 @@ export class ExplorationScene extends Phaser.Scene {
 
   // ─── Helpers ────────────────────────────────────────────────────────────
 
-  private extractCollisionData(): number[] {
-    const data: number[] = [];
-    for (let y = 0; y < this.map.height; y++) for (let x = 0; x < this.map.width; x++) { const t = this.collisionLayer.getTileAt(x, y); data.push(t && t.index > 0 ? t.index : 0); }
-    return data;
-  }
+
 }

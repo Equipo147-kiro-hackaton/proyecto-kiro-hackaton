@@ -150,3 +150,123 @@ export interface Story {
   learnedConcepts?: string[];    // for outros only
   realWorldExample?: string;     // for outros only
 }
+
+// ─── Dungeon Visual Overhaul: geometría ──────────────────────────────────────
+
+/**
+ * Reference to a tile by row and column in the FloorDescriptor grid.
+ * The flat index is computed as `row * width + column`.
+ */
+export interface TileRef {
+  row: number;
+  column: number;
+}
+
+export type RoomRole = 'start' | 'terminal' | 'boss' | 'rest';
+
+export interface Room {
+  id: string;
+  role: RoomRole;
+  /** Fila del tile superior izquierdo del área caminable. */
+  row: number;
+  /** Columna del tile superior izquierdo del área caminable. */
+  column: number;
+  /** Ancho en tiles caminables, sin contar el perímetro bloqueante. */
+  width: number;
+  height: number;
+}
+
+export interface Corridor {
+  id: string;
+  fromRoomId: string;
+  toRoomId: string;
+  /** Tiles caminables tallados, en orden desde fromRoomId hasta toRoomId. */
+  tiles: TileRef[];
+  width: 1 | 2;
+}
+
+export type ObjectiveType = 'terminal' | 'door';
+
+export interface Objective {
+  id: string;
+  type: ObjectiveType;
+  tile: TileRef;
+  roomId: string;
+  /** Solo en objetivos de tipo terminal. */
+  fragmentId?: string;
+  puzzleId?: string;
+  activated: boolean;
+}
+
+export type PropType =
+  | 'server-rack'
+  | 'crt-monitor'
+  | 'server-tower'
+  | 'power-panel'
+  | 'cable-bundle'
+  | 'energy-container'
+  | 'corrupt-container'
+  | 'padlock';
+
+export interface Prop {
+  id: string;
+  type: PropType;
+  tile: TileRef;
+  blocking: boolean;
+  /** Índice de tile del tileset. Es el valor escrito en collision si blocking. */
+  tileIndex: number;
+}
+
+export interface CircuitPath {
+  objectiveId: string;
+  /** Primer tile = spawn, último tile = tile del objetivo. Sin repetidos. */
+  tiles: TileRef[];
+}
+
+/**
+ * FloorDescriptor — Estructura de datos independiente de Phaser que describe
+ * salas, corredores, tiles, spawn, terminales, puertas y posición del jefe.
+ *
+ * COLLISION CONTRACT:
+ * In the `collision` array, value `0` means Tile_Caminable (walkable) and
+ * any value !== 0 means Tile_Bloqueante (blocking). The array is flat,
+ * indexed by `row * width + column`, with length `width * height`.
+ */
+export interface FloorDescriptor {
+  levelNumber: number;
+  difficulty: DifficultyMode;
+  themeId: 'beginner' | 'normal' | 'hard';
+  /** Semilla efectiva del intento que produjo este descriptor. */
+  seed: number;
+  width: number;
+  height: number;
+  /** Índices de tile de piso y vacío. Longitud width × height. */
+  ground: number[];
+  /** Índices de tile de prop, 0 donde no hay prop. Longitud width × height. */
+  propsLayer: number[];
+  /** 0 = caminable, distinto de 0 = bloqueante. Longitud width × height. */
+  collision: number[];
+  rooms: Room[];
+  corridors: Corridor[];
+  spawn: TileRef;
+  /** Orden estable: terminales por (row, column), puerta al final. */
+  objectives: Objective[];
+  props: Prop[];
+  circuitPaths: CircuitPath[];
+}
+
+// ─── Dungeon Visual Overhaul: validación ─────────────────────────────────────
+
+export interface Violation {
+  /** Identificador de la comprobación incumplida (ValidationCheck). */
+  check: string;
+  row: number;
+  column: number;
+  /** Contexto legible: capa afectada, cantidad esperada/recibida, id de objetivo. */
+  detail?: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  violations: Violation[];
+}
